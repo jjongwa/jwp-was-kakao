@@ -52,6 +52,7 @@
   * [x] 메서드(`CustomMethod`)를 추출할 수 있다.
     * 메서드는 GET과 POST가 존재한다.
   * [x] path(`CustomPath`)를 추출할 수 있다.
+  * [x] headers(`CustomHeaders`)를 추출할 수 있다.
 
 * [ ] Request Line에서 path 분리할 수 있다.
 
