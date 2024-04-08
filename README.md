@@ -48,7 +48,7 @@
 
 ![img.png](img.png)
 
-* [ ] 모든 Request Header를 출력할 수 있다.
+* [x] 모든 Request Header를 출력할 수 있다.
   * [x] 메서드(`CustomMethod`)를 추출할 수 있다.
     * 메서드는 GET과 POST가 존재한다.
   * [x] path(`CustomPath`)를 추출할 수 있다.

@@ -1,16 +1,15 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.FileIoUtils;
+
+import java.io.*;
+import java.net.Socket;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String DEFAULT_FILE_NAME = "./templates/index.html";
 
     private Socket connection;
 
@@ -24,13 +23,28 @@ public class RequestHandler implements Runnable {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
+            final InputStreamReader inputStreamReader = new InputStreamReader(in);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            final CustomRequest customRequest = new CustomRequest(bufferedReader);
+
+            final DataOutputStream dos = new DataOutputStream(out);
+            byte[] body = "Hello, World!".getBytes();
+            if (customRequest.checkMethod(CustomMethod.GET)) {
+                body = makeBody(customRequest);
+            }
+
             response200Header(dos, body.length);
             responseBody(dos, body);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    private byte[] makeBody(final CustomRequest customRequest) throws Exception {
+        if (customRequest.checkPath("/")) {
+            return FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
+        }
+        return "Hello, World!".getBytes();
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
