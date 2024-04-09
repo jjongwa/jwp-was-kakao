@@ -28,7 +28,7 @@ public class RequestHandler implements Runnable {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             final InputStreamReader inputStreamReader = new InputStreamReader(in);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            final CustomRequest customRequest = new CustomRequest(bufferedReader);
+            final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
 
             final DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello, World!".getBytes();
