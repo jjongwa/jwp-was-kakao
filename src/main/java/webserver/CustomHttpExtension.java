@@ -8,6 +8,9 @@ public enum CustomHttpExtension {
     JS(".js", "text/javascript", "static"),
     ICO(".ico", "image/svg+xml", "templates"),;
 
+    private static final String DEFALUT_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String STATIC_DIRECTORY_PATH = "static";
+
     private final String extension;
     private final String contentType;
     private final String directory;
@@ -23,7 +26,7 @@ public enum CustomHttpExtension {
                 .filter(customHttpExtension -> path.endsWith(customHttpExtension.extension))
                 .findFirst()
                 .map(customHttpExtension -> customHttpExtension.contentType)
-                .orElse("text/html;charset=utf-8");
+                .orElse(DEFALUT_CONTENT_TYPE);
     }
 
     public static String findDirectory(final String path) {
@@ -31,6 +34,6 @@ public enum CustomHttpExtension {
                 .filter(customHttpExtension -> path.endsWith(customHttpExtension.extension))
                 .findFirst()
                 .map(customHttpExtension -> customHttpExtension.directory)
-                .orElse("static");
+                .orElse(STATIC_DIRECTORY_PATH);
     }
 }

@@ -20,7 +20,7 @@ class CustomHeadersTest {
 
         // when
         final CustomHeaders customHeaders = new CustomHeaders(headerInput);
-        final Map<String, String> values = customHeaders.getValues();
+        final Map<String, String> values = customHeaders.getElements();
 
         // then
         assertSoftly(softly -> {
