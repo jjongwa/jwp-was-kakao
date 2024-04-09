@@ -5,6 +5,8 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileIoUtils;
+import webserver.request.CustomMethod;
+import webserver.request.CustomRequest;
 
 import java.io.*;
 import java.net.Socket;
@@ -42,10 +44,10 @@ public class RequestHandler implements Runnable {
             final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
             byte[] body = "Hello, World!".getBytes();
 
-            if (customRequest.checkMethod(CustomMethod.GET)) {
+            if (customRequest.isMethodEqual(CustomMethod.GET)) {
                  body  = makeBody(customRequest);
             }
-            if (customRequest.checkMethod(CustomMethod.POST) && customRequest.isPathStartingWith("/user/create") && createUser(customRequest)) {
+            if (customRequest.isMethodEqual(CustomMethod.POST) && customRequest.isPathStartingWith("/user/create") && createUser(customRequest)) {
                 redirectResponse(dos, body);
                 return;
             }
@@ -66,7 +68,7 @@ public class RequestHandler implements Runnable {
     }
 
     private boolean createUser(CustomRequest customRequest) {
-        final Map<String, String> queryParams = customRequest.getCustomBody();
+        final Map<String, String> queryParams = customRequest.getBody();
         final User user = User.of(queryParams);
         if (DataBase.findUserById(user.getUserId()).isPresent()) {
             return false;
@@ -76,16 +78,16 @@ public class RequestHandler implements Runnable {
     }
 
     private byte[] makeBody(final CustomRequest customRequest) throws Exception {
-        if (customRequest.checkPath("/")) {
+        if (customRequest.isPathEqual("/")) {
             return FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
         }
-        return FileIoUtils.loadFileFromClasspath(customRequest.getDirectory() + customRequest.getCustomPath().getValue());
+        return FileIoUtils.loadFileFromClasspath(customRequest.findFilePath());
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent, CustomRequest customRequest) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: " + customRequest.getContentType() + "\r\n");
+            dos.writeBytes("Content-Type: " + customRequest.findContentType() + "\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {

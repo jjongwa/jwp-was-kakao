@@ -1,6 +1,7 @@
-package webserver;
+package webserver.request;
 
 import utils.QueryStringParser;
+import webserver.CustomHttpExtension;
 
 import java.util.Map;
 import java.util.Objects;

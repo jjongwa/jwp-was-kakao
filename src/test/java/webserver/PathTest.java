@@ -1,6 +1,7 @@
 package webserver;
 
 import org.junit.jupiter.api.Test;
+import webserver.request.CustomPath;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
