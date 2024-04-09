@@ -22,6 +22,14 @@ public class CustomRequest {
         return this.customPath.isMatched(path);
     }
 
+    public String getDirectory() {
+        return this.customPath.getDirectory();
+    }
+
+    public String getContentType() {
+        return this.customPath.getExtension();
+    }
+
     public CustomMethod getCustomMethod() {
         return customMethod;
     }

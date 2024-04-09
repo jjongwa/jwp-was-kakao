@@ -9,7 +9,7 @@ import java.net.Socket;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
-    private static final String DEFAULT_FILE_NAME = "./templates/index.html";
+    private static final String DEFAULT_FILE_NAME = "templates/index.html";
 
     private Socket connection;
 
@@ -22,7 +22,6 @@ public class RequestHandler implements Runnable {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             final InputStreamReader inputStreamReader = new InputStreamReader(in);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final CustomRequest customRequest = new CustomRequest(bufferedReader);
@@ -33,7 +32,7 @@ public class RequestHandler implements Runnable {
                 body = makeBody(customRequest);
             }
 
-            response200Header(dos, body.length);
+            response200Header(dos, body.length, customRequest);
             responseBody(dos, body);
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -44,13 +43,13 @@ public class RequestHandler implements Runnable {
         if (customRequest.checkPath("/")) {
             return FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
         }
-        return "Hello, World!".getBytes();
+        return FileIoUtils.loadFileFromClasspath(customRequest.getDirectory() + customRequest.getCustomPath().getValue());
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, CustomRequest customRequest) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Type: " + customRequest.getContentType() + "\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
