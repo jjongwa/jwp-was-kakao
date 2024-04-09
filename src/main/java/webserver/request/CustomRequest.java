@@ -3,11 +3,14 @@ package webserver.request;
 import utils.IOUtils;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CustomRequest {
+
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String EMPTY_BODY = "";
 
     private final CustomRequestLine line;
     private final CustomHeaders headers;
@@ -19,31 +22,33 @@ public class CustomRequest {
         this.body = body;
     }
 
-    public static CustomRequest makeRequest(final BufferedReader bufferedReader) throws Exception {
+    public static CustomRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
+        final CustomHeaders customHeaders = readHeaders(bufferedReader);
 
-        final List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
-            lines.add(line);
-            line = bufferedReader.readLine();
-        }
+        final CustomBody customBody = readBodyIfPresent(bufferedReader, customHeaders);
 
-        final CustomHeaders customHeaders = new CustomHeaders(lines);
-
-        if (!bufferedReader.ready()) {
-            return new CustomRequest(
-                    CustomRequestLine.from(firstLine),
-                    customHeaders,
-                    new CustomBody("")
-            );
-        }
-        final int contentLength = Integer.parseInt(customHeaders.getValues().get("Content-Length"));
         return new CustomRequest(
                 CustomRequestLine.from(firstLine),
                 customHeaders,
-                new CustomBody(IOUtils.readData(bufferedReader, contentLength))
+                customBody
         );
+    }
+
+    private static CustomHeaders readHeaders(BufferedReader bufferedReader) {
+        return new CustomHeaders(
+                bufferedReader.lines()
+                        .takeWhile(newLine -> newLine != null && !newLine.isEmpty())
+                        .collect(Collectors.toUnmodifiableList())
+        );
+    }
+
+    private static CustomBody readBodyIfPresent(BufferedReader bufferedReader, CustomHeaders customHeaders) throws IOException {
+        if (customHeaders.getValues().containsKey(CONTENT_LENGTH)) {
+            final int contentLength = Integer.parseInt(customHeaders.getValues().get(CONTENT_LENGTH));
+            return new CustomBody(IOUtils.readData(bufferedReader, contentLength));
+        }
+        return new CustomBody(EMPTY_BODY);
     }
 
     public boolean isMethodEqual(final CustomMethod customMethod) {
