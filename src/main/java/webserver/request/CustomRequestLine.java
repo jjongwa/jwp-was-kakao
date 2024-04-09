@@ -23,7 +23,7 @@ public class CustomRequestLine {
         return this.method == method;
     }
 
-    public boolean checkPath(String path) {
+    public boolean checkPath(final String path) {
         return this.path.isMatched(path);
     }
 

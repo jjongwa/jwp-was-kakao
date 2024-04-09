@@ -1,7 +1,6 @@
-package webserver;
+package webserver.request;
 
 import org.junit.jupiter.api.Test;
-import webserver.request.CustomHeaders;
 
 import java.util.List;
 import java.util.Map;

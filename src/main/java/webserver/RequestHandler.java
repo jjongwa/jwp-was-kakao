@@ -54,7 +54,6 @@ public class RequestHandler implements Runnable {
                 final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
                 final DataOutputStream dos = new DataOutputStream(out)
         ) {
-
             final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
 

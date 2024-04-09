@@ -1,4 +1,4 @@
-package webserver;
+package webserver.request;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,7 @@ import utils.FileIoUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HttpRequestTest {
+class CustomHttpRequestTest {
     @Test
     void GET_index_요청에_대해_해당하는_html_파일을_전달한다() throws Exception{
         // given

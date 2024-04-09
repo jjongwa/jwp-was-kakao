@@ -1,15 +1,14 @@
-package webserver;
+package webserver.request;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import webserver.request.CustomMethod;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SuppressWarnings("NonAsciiCharacters")
-class MethodTest {
+class CustomMethodTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
