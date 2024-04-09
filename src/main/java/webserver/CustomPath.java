@@ -1,5 +1,8 @@
 package webserver;
 
+import utils.QueryStringParser;
+
+import java.util.Map;
 import java.util.Objects;
 
 public class CustomPath {
@@ -20,6 +23,10 @@ public class CustomPath {
 
     public String getExtension() {
         return CustomHttpExtension.findContentType(this.value);
+    }
+
+    public Map<String, String> getQueryParams() {
+        return QueryStringParser.parse(this.value);
     }
 
     public String getValue() {

@@ -1,6 +1,7 @@
 package webserver;
 
 import java.io.BufferedReader;
+import java.util.Map;
 
 public class CustomRequest {
 
@@ -28,6 +29,10 @@ public class CustomRequest {
 
     public String getContentType() {
         return this.customPath.getExtension();
+    }
+
+    public Map<String, String> getQueryParams() {
+        return this.customPath.getQueryParams();
     }
 
     public CustomMethod getCustomMethod() {

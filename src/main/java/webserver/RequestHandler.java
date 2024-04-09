@@ -1,15 +1,19 @@
 package webserver;
 
+import db.DataBase;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileIoUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
     private static final String DEFAULT_FILE_NAME = "templates/index.html";
+    private static final String ALREADY_EXIST_USER_MESSAGE = "이미 존재하는 사용자입니다.";
 
     private Socket connection;
 
@@ -29,6 +33,9 @@ public class RequestHandler implements Runnable {
             final DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello, World!".getBytes();
             if (customRequest.checkMethod(CustomMethod.GET)) {
+                if (customRequest.getCustomPath().getValue().startsWith("/user/create")) {
+                    createUser(customRequest);
+                }
                 body = makeBody(customRequest);
             }
 
@@ -37,6 +44,15 @@ public class RequestHandler implements Runnable {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    private void createUser(CustomRequest customRequest) {
+        final Map<String, String> queryParams = customRequest.getQueryParams();
+        final User user = User.of(queryParams);
+        if (DataBase.findUserById(user.getUserId()).isPresent()) {
+            throw new IllegalArgumentException(ALREADY_EXIST_USER_MESSAGE);
+        }
+        DataBase.addUser(user);
     }
 
     private byte[] makeBody(final CustomRequest customRequest) throws Exception {
