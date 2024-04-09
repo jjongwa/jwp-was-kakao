@@ -1,14 +1,18 @@
 package webserver;
 
+import utils.QueryStringParser;
+
+import java.util.Map;
+
 public class CustomBody {
 
-        private final String body;
+    private final Map<String, String> elements;
 
-        public CustomBody(final String body) {
-            this.body = body;
-        }
+    public CustomBody(final String body) {
+        this.elements = QueryStringParser.parse(body);
+    }
 
-        public String getBody() {
-            return body;
-        }
+    public Map<String, String> getBody() {
+        return elements;
+    }
 }

@@ -78,6 +78,10 @@ public class CustomRequest {
         return this.customPath.getQueryParams();
     }
 
+    public Map<String, String> getCustomBody() {
+        return customBody.getBody();
+    }
+
     public CustomMethod getCustomMethod() {
         return customMethod;
     }

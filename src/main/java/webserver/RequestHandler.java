@@ -13,7 +13,6 @@ import java.util.Map;
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
     private static final String DEFAULT_FILE_NAME = "templates/index.html";
-    private static final String ALREADY_EXIST_USER_MESSAGE = "이미 존재하는 사용자입니다.";
 
     private Socket connection;
 
@@ -33,12 +32,18 @@ public class RequestHandler implements Runnable {
             final DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello, World!".getBytes();
             if (customRequest.checkMethod(CustomMethod.GET)) {
-                if (customRequest.getCustomPath().getValue().startsWith("/user/create")) {
-                    createUser(customRequest);
-                }
                 body = makeBody(customRequest);
+            } else if (customRequest.checkMethod(CustomMethod.POST)) {
+                if (customRequest.getCustomPath().getValue().startsWith("/user/create")) {
+                    boolean isCreated = createUser(customRequest);
+                    body = FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
+                    if (isCreated) {
+                        redirectHeader(dos);
+                        responseBody(dos, body);
+                        return;
+                    }
+                }
             }
-
             response200Header(dos, body.length, customRequest);
             responseBody(dos, body);
         } catch (Exception e) {
@@ -46,13 +51,14 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void createUser(CustomRequest customRequest) {
-        final Map<String, String> queryParams = customRequest.getQueryParams();
+    private boolean createUser(CustomRequest customRequest) {
+        final Map<String, String> queryParams = customRequest.getCustomBody();
         final User user = User.of(queryParams);
         if (DataBase.findUserById(user.getUserId()).isPresent()) {
-            throw new IllegalArgumentException(ALREADY_EXIST_USER_MESSAGE);
+            return false;
         }
         DataBase.addUser(user);
+        return true;
     }
 
     private byte[] makeBody(final CustomRequest customRequest) throws Exception {
@@ -67,6 +73,16 @@ public class RequestHandler implements Runnable {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: " + customRequest.getContentType() + "\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void redirectHeader(DataOutputStream dos) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 REDIRECT \r\n");
+            dos.writeBytes("Location: /index.html \r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             logger.error(e.getMessage());
