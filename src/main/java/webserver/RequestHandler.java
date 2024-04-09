@@ -21,34 +21,48 @@ public class RequestHandler implements Runnable {
     }
 
     public void run() {
-        logger.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
-
-        try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            final InputStreamReader inputStreamReader = new InputStreamReader(in);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
-
-            final DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello, World!".getBytes();
-            if (customRequest.checkMethod(CustomMethod.GET)) {
-                body = makeBody(customRequest);
-            } else if (customRequest.checkMethod(CustomMethod.POST)) {
-                if (customRequest.getCustomPath().getValue().startsWith("/user/create")) {
-                    boolean isCreated = createUser(customRequest);
-                    body = FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
-                    if (isCreated) {
-                        redirectHeader(dos);
-                        responseBody(dos, body);
-                        return;
-                    }
-                }
-            }
-            response200Header(dos, body.length, customRequest);
-            responseBody(dos, body);
+        logConnectionDetails();
+        try {
+            processConnection();
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    private void logConnectionDetails() {
+        logger.debug("New Client Connect! Connected IP : {}, Port : {}",
+                connection.getInetAddress(), connection.getPort());
+    }
+
+    private void processConnection() {
+        try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+             final DataOutputStream dos = new DataOutputStream(out)) {
+
+            final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
+            byte[] body = "Hello, World!".getBytes();
+
+            if (customRequest.checkMethod(CustomMethod.GET)) {
+                 body  = makeBody(customRequest);
+            }
+            if (customRequest.checkMethod(CustomMethod.POST) && customRequest.isPathStartingWith("/user/create") && createUser(customRequest)) {
+                redirectResponse(dos, body);
+                return;
+            }
+            standardResponse(dos, body, customRequest);
+        } catch (final Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void redirectResponse(DataOutputStream dos, byte[] body) {
+        redirectHeader(dos);
+        responseBody(dos, body);
+    }
+
+    private void standardResponse(DataOutputStream dos, byte[] body, CustomRequest customRequest) {
+        response200Header(dos, body.length, customRequest);
+        responseBody(dos, body);
     }
 
     private boolean createUser(CustomRequest customRequest) {

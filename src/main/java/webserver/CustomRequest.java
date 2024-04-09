@@ -66,6 +66,10 @@ public class CustomRequest {
         return this.customPath.isMatched(path);
     }
 
+    public boolean isPathStartingWith(final String path) {
+        return customPath.getValue().startsWith(path);
+    }
+
     public String getDirectory() {
         return this.customPath.getDirectory();
     }
