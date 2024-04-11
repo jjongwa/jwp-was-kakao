@@ -46,9 +46,9 @@ public class CustomRequest {
     private static CustomBody readBodyIfPresent(BufferedReader bufferedReader, CustomHeaders customHeaders) throws IOException {
         if (customHeaders.getElements().containsKey(CONTENT_LENGTH)) {
             final int contentLength = Integer.parseInt(customHeaders.getElements().get(CONTENT_LENGTH));
-            return new CustomBody(IOUtils.readData(bufferedReader, contentLength));
+            return CustomBody.parse(IOUtils.readData(bufferedReader, contentLength));
         }
-        return new CustomBody(EMPTY_BODY);
+        return CustomBody.parse(EMPTY_BODY);
     }
 
     public boolean isMethodEqual(final CustomMethod customMethod) {
