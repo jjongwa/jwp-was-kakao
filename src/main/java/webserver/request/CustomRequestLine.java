@@ -16,7 +16,7 @@ public class CustomRequestLine {
 
     public static CustomRequestLine from(final String firstLine) {
         final String[] split = firstLine.split(FIRST_LINE_SEPARATOR);
-        return new CustomRequestLine(CustomMethod.find(split[ZERO]), new CustomPath(split[ONE]));
+        return new CustomRequestLine(CustomMethod.find(split[ZERO]), CustomPath.from(split[ONE]));
     }
 
     public boolean checkMethod(final CustomMethod method) {
@@ -28,7 +28,7 @@ public class CustomRequestLine {
     }
 
     public boolean isPathStartingWith(final String path) {
-        return this.path.getValue().startsWith(path);
+        return this.path.getResource().startsWith(path);
     }
 
     public String getContentType() {
@@ -36,6 +36,6 @@ public class CustomRequestLine {
     }
 
     public String getFilePath() {
-        return this.path.getDirectory() + this.path.getValue();
+        return this.path.getDirectory() + this.path.getResource();
     }
 }

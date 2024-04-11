@@ -14,7 +14,7 @@ class CustomPathTest {
         final String pathInput = "/index.html";
 
         // when & then
-        assertDoesNotThrow(() -> new CustomPath(pathInput));
+        assertDoesNotThrow(() -> CustomPath.from(pathInput));
     }
 
     @Test
@@ -23,7 +23,7 @@ class CustomPathTest {
         final String expected = "path";
 
         // when
-        final String actual = new CustomPath(expected).getValue();
+        final String actual = CustomPath.from(expected).getResource();
 
         // then
         assertThat(actual).isEqualTo(expected);
