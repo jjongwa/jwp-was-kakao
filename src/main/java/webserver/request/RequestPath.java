@@ -1,10 +1,10 @@
 package webserver.request;
 
-import webserver.CustomHttpExtension;
+import webserver.HttpExtensionType;
 
 import java.util.Objects;
 
-public class CustomPath {
+public class RequestPath {
 
     private static final int BEGIN_INDEX = 0;
     private static final String DELIMITER = "?";
@@ -12,21 +12,21 @@ public class CustomPath {
     private final String resource;
     private final QueryParameter queryParameter;
 
-    private CustomPath(final String resource, final QueryParameter queryParameter) {
+    private RequestPath(final String resource, final QueryParameter queryParameter) {
         this.resource = resource;
         this.queryParameter = queryParameter;
     }
 
-    public static CustomPath from(final String uri) {
+    public static RequestPath from(final String uri) {
         if (!uri.contains(DELIMITER)) {
-            return new CustomPath(uri, QueryParameter.empty());
+            return new RequestPath(uri, QueryParameter.empty());
         }
 
         final int queryStringStartIndex = uri.indexOf(DELIMITER);
         final String resource = uri.substring(BEGIN_INDEX, queryStringStartIndex);
         final String queryString = uri.substring(queryStringStartIndex + 1);
 
-        return new CustomPath(resource, QueryParameter.from(queryString));
+        return new RequestPath(resource, QueryParameter.from(queryString));
     }
 
     public boolean isMatched(final String path) {
@@ -34,11 +34,11 @@ public class CustomPath {
     }
 
     public String getDirectory() {
-        return CustomHttpExtension.findDirectory(this.resource);
+        return HttpExtensionType.findDirectory(this.resource);
     }
 
     public String getExtension() {
-        return CustomHttpExtension.findContentType(this.resource);
+        return HttpExtensionType.findContentType(this.resource);
     }
 
     public String getResource() {

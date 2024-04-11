@@ -5,7 +5,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileIoUtils;
-import webserver.request.CustomMethod;
+import webserver.request.HttpMethod;
 import webserver.request.CustomRequest;
 
 import java.io.*;
@@ -57,10 +57,10 @@ public class RequestHandler implements Runnable {
             final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
 
-            if (customRequest.isMethodEqual(CustomMethod.GET)) {
+            if (customRequest.isMethodEqual(HttpMethod.GET)) {
                 body = makeBody(customRequest);
             }
-            if (customRequest.isMethodEqual(CustomMethod.POST) && isCreateUserRequest(customRequest)) {
+            if (customRequest.isMethodEqual(HttpMethod.POST) && isCreateUserRequest(customRequest)) {
                 redirectResponse(dos, body);
                 return;
             }

@@ -8,7 +8,7 @@ import java.util.Map;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @SuppressWarnings("NonAsciiCharacters")
-class CustomHeadersTest {
+class RequestHeadersTest {
 
     @Test
     void Request_Header를_입력_받았을_때_각_key에_해당하는_value를_매칭할_수_있다() {
@@ -18,8 +18,8 @@ class CustomHeadersTest {
                 , "Accept: */*\n");
 
         // when
-        final CustomHeaders customHeaders = new CustomHeaders(headerInput);
-        final Map<String, String> values = customHeaders.getElements();
+        final RequestHeaders requestHeaders = new RequestHeaders(headerInput);
+        final Map<String, String> values = requestHeaders.getElements();
 
         // then
         assertSoftly(softly -> {

@@ -7,7 +7,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 
-public class CustomBody {
+public class RequestBody {
 
     private static final String DELIMITER = "&";
     private static final String REGEX = "=";
@@ -17,23 +17,23 @@ public class CustomBody {
 
     private final Map<String, String> elements;
 
-    private CustomBody(final Map<String, String> elements) {
+    private RequestBody(final Map<String, String> elements) {
         this.elements = elements;
     }
 
-    public static CustomBody empty() {
-        return new CustomBody(new HashMap<>());
+    public static RequestBody empty() {
+        return new RequestBody(new HashMap<>());
     }
 
-    public static CustomBody parse(final String bodyLine) {
+    public static RequestBody parse(final String bodyLine) {
         if (bodyLine == null) {
-            return CustomBody.empty();
+            return RequestBody.empty();
         }
         return Arrays.stream(bodyLine.split(DELIMITER))
                 .map(field -> field.split(REGEX, SPLIT_LIMIT))
                 .collect(collectingAndThen(
                         toMap(field -> field[KEY_INDEX], field -> field[VALUE_INDEX]),
-                        CustomBody::new
+                        RequestBody::new
                 ));
     }
 

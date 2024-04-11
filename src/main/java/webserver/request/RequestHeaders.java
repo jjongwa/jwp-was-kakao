@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CustomHeaders {
+public class RequestHeaders {
 
     private static final String SPLIT_REGEX = ": ";
     private static final int VALUE_INDEX = 1;
@@ -12,7 +12,7 @@ public class CustomHeaders {
 
     private final Map<String, String> elements;
 
-    public CustomHeaders(final List<String> headersInput) {
+    public RequestHeaders(final List<String> headersInput) {
         this.elements = parseHeaders(headersInput);
     }
 

@@ -6,20 +6,20 @@ public class CustomRequestLine {
     private static final int ZERO = 0;
     private static final int ONE = 1;
 
-    private final CustomMethod method;
-    private final CustomPath path;
+    private final HttpMethod method;
+    private final RequestPath path;
 
-    private CustomRequestLine(final CustomMethod method, final CustomPath path) {
+    private CustomRequestLine(final HttpMethod method, final RequestPath path) {
         this.method = method;
         this.path = path;
     }
 
     public static CustomRequestLine from(final String firstLine) {
         final String[] split = firstLine.split(FIRST_LINE_SEPARATOR);
-        return new CustomRequestLine(CustomMethod.find(split[ZERO]), CustomPath.from(split[ONE]));
+        return new CustomRequestLine(HttpMethod.find(split[ZERO]), RequestPath.from(split[ONE]));
     }
 
-    public boolean checkMethod(final CustomMethod method) {
+    public boolean checkMethod(final HttpMethod method) {
         return this.method == method;
     }
 

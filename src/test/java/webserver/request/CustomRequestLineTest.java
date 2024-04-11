@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static webserver.request.CustomMethod.GET;
+import static webserver.request.HttpMethod.GET;
 
 @SuppressWarnings("NonAsciiCharacters")
 class CustomRequestLineTest {

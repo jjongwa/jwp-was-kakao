@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SuppressWarnings("NonAsciiCharacters")
-class CustomPathTest {
+class RequestPathTest {
 
     @Test
     void 입력값을_받아_해당하는_path를_반환할_수_있다() {
@@ -14,7 +14,7 @@ class CustomPathTest {
         final String pathInput = "/index.html";
 
         // when & then
-        assertDoesNotThrow(() -> CustomPath.from(pathInput));
+        assertDoesNotThrow(() -> RequestPath.from(pathInput));
     }
 
     @Test
@@ -23,7 +23,7 @@ class CustomPathTest {
         final String expected = "path";
 
         // when
-        final String actual = CustomPath.from(expected).getResource();
+        final String actual = RequestPath.from(expected).getResource();
 
         // then
         assertThat(actual).isEqualTo(expected);

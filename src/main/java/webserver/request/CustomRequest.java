@@ -13,10 +13,10 @@ public class CustomRequest {
     private static final String EMPTY_BODY = "";
 
     private final CustomRequestLine line;
-    private final CustomHeaders headers;
-    private final CustomBody body;
+    private final RequestHeaders headers;
+    private final RequestBody body;
 
-    public CustomRequest(final CustomRequestLine line, final CustomHeaders headers, final CustomBody body) {
+    public CustomRequest(final CustomRequestLine line, final RequestHeaders headers, final RequestBody body) {
         this.line = line;
         this.headers = headers;
         this.body = body;
@@ -24,35 +24,35 @@ public class CustomRequest {
 
     public static CustomRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
-        final CustomHeaders customHeaders = readHeaders(bufferedReader);
+        final RequestHeaders requestHeaders = readHeaders(bufferedReader);
 
-        final CustomBody customBody = readBodyIfPresent(bufferedReader, customHeaders);
+        final RequestBody requestBody = readBodyIfPresent(bufferedReader, requestHeaders);
 
         return new CustomRequest(
                 CustomRequestLine.from(firstLine),
-                customHeaders,
-                customBody
+                requestHeaders,
+                requestBody
         );
     }
 
-    private static CustomHeaders readHeaders(BufferedReader bufferedReader) {
-        return new CustomHeaders(
+    private static RequestHeaders readHeaders(BufferedReader bufferedReader) {
+        return new RequestHeaders(
                 bufferedReader.lines()
                         .takeWhile(newLine -> newLine != null && !newLine.isEmpty())
                         .collect(Collectors.toUnmodifiableList())
         );
     }
 
-    private static CustomBody readBodyIfPresent(BufferedReader bufferedReader, CustomHeaders customHeaders) throws IOException {
-        if (customHeaders.getElements().containsKey(CONTENT_LENGTH)) {
-            final int contentLength = Integer.parseInt(customHeaders.getElements().get(CONTENT_LENGTH));
-            return CustomBody.parse(IOUtils.readData(bufferedReader, contentLength));
+    private static RequestBody readBodyIfPresent(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
+        if (requestHeaders.getElements().containsKey(CONTENT_LENGTH)) {
+            final int contentLength = Integer.parseInt(requestHeaders.getElements().get(CONTENT_LENGTH));
+            return RequestBody.parse(IOUtils.readData(bufferedReader, contentLength));
         }
-        return CustomBody.parse(EMPTY_BODY);
+        return RequestBody.parse(EMPTY_BODY);
     }
 
-    public boolean isMethodEqual(final CustomMethod customMethod) {
-        return this.line.checkMethod(customMethod);
+    public boolean isMethodEqual(final HttpMethod httpMethod) {
+        return this.line.checkMethod(httpMethod);
     }
 
     public boolean isPathStartingWith(final String path) {

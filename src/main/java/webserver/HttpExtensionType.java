@@ -2,7 +2,7 @@ package webserver;
 
 import java.util.Arrays;
 
-public enum CustomHttpExtension {
+public enum HttpExtensionType {
     HTML(".html", "text/html;charset=utf-8", "templates"),
     CSS(".css", "text/css", "static"),
     JS(".js", "text/javascript", "static"),
@@ -15,25 +15,25 @@ public enum CustomHttpExtension {
     private final String contentType;
     private final String directory;
 
-    CustomHttpExtension(final String extension, final String contentType, String directory) {
+    HttpExtensionType(final String extension, final String contentType, String directory) {
         this.extension = extension;
         this.contentType = contentType;
         this.directory = directory;
     }
 
     public static String findContentType(final String path) {
-        return Arrays.stream(CustomHttpExtension.values())
-                .filter(customHttpExtension -> path.endsWith(customHttpExtension.extension))
+        return Arrays.stream(HttpExtensionType.values())
+                .filter(httpExtensionType -> path.endsWith(httpExtensionType.extension))
                 .findFirst()
-                .map(customHttpExtension -> customHttpExtension.contentType)
+                .map(httpExtensionType -> httpExtensionType.contentType)
                 .orElse(DEFALUT_CONTENT_TYPE);
     }
 
     public static String findDirectory(final String path) {
-        return Arrays.stream(CustomHttpExtension.values())
-                .filter(customHttpExtension -> path.endsWith(customHttpExtension.extension))
+        return Arrays.stream(HttpExtensionType.values())
+                .filter(httpExtensionType -> path.endsWith(httpExtensionType.extension))
                 .findFirst()
-                .map(customHttpExtension -> customHttpExtension.directory)
+                .map(httpExtensionType -> httpExtensionType.directory)
                 .orElse(STATIC_DIRECTORY_PATH);
     }
 }
