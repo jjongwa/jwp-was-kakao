@@ -71,7 +71,7 @@ public class RequestHandler implements Runnable {
     }
 
     private boolean isCreateUserRequest(final CustomRequest customRequest) {
-        return customRequest.isPathStartingWith(CREATE_USER_PATH) && createUser(customRequest);
+        return customRequest.isPathStartingWith(CREATE_USER_PATH) && isUserCreatable(customRequest);
     }
 
     private void redirectResponse(final DataOutputStream dos, final byte[] body) {
@@ -84,7 +84,7 @@ public class RequestHandler implements Runnable {
         responseBody(dos, body);
     }
 
-    private boolean createUser(final CustomRequest customRequest) {
+    private boolean isUserCreatable(final CustomRequest customRequest) {
         final Map<String, String> queryParams = customRequest.getBody();
         final User user = User.of(queryParams);
         if (DataBase.findUserById(user.getUserId()).isPresent()) {
