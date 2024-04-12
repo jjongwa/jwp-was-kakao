@@ -107,8 +107,8 @@
 * [x] 회원가입 후 Redirect 응답을 보낼 수 있다.
 
 * [ ] 로그인 기능을 구현할 수 있다.
-  * [ ] request에서 쿠기 정보를 추출할 수 있다.
-    * [ ] 쿠키에 JSESSIONID가 존재하는지 확인할 수 있다.
+  * [x] request에서 쿠기 정보를 추출할 수 있다.
+    * [x] 쿠키에 JSESSIONID가 존재하는지 확인할 수 있다.
   * [ ] 로그인 성공 시 index.html로 Redirect 응답을 보낼 수 있다.
   * [ ] 로그인 실패 시 login_failed.html로 Redirect 응답을 보낼 수 있다.
 
