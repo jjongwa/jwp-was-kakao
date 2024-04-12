@@ -18,15 +18,19 @@ public class RequestHandler implements Runnable {
     private static final String CRLF = "\r\n";
     private static final String DEFAULT_FILE_NAME = "templates/index.html";
     private static final String CREATE_USER_PATH = "/user/create";
+    private static final String LOGIN_USER_PATH = "/user/login";
     private static final String HTTP_1_1_200_OK = "HTTP/1.1 200 OK " + CRLF;
     private static final String HTTP_1_1_302_REDIRECT = "HTTP/1.1 302 REDIRECT " + CRLF;
     private static final String CONTENT_TYPE_KEY = "Content-Type: ";
     private static final String CONTENT_LENGTH_KEY = "Content-Length: ";
     private static final String LOCATION_INDEX_HTML = "Location: /index.html " + CRLF;
+    private static final String LOCATION_LONGIN_FAILED_HTML = "Location: /user/login_failed.html " + CRLF;
     private static final String DEFALUT_PAGE_PATH = "/";
     private static final int OFFSET_ZERO = 0;
     private static final String DEFAULT_PAGE_MESSAGE = "Hello, World!";
     private static final String NEW_CLIENT_CONNECT_MESSAGE = "New Client Connect! Connected IP : {}, Port : {}";
+    private static final String USER_ID = "userId";
+    private static final String PASSWORD = "password";
 
     private Socket connection;
 
@@ -60,38 +64,47 @@ public class RequestHandler implements Runnable {
             if (httpRequest.isMethodEqual(HttpMethod.GET)) {
                 body = makeBody(httpRequest);
             }
-            if (httpRequest.isMethodEqual(HttpMethod.POST) && isCreateUserRequest(httpRequest)) {
-                redirectResponse(dos, body);
+            if (httpRequest.isMethodEqual(HttpMethod.POST) && httpRequest.isPathStartingWith(CREATE_USER_PATH)) {
+                doPostCreateUser(httpRequest, dos, body);
                 return;
             }
+            if (httpRequest.isMethodEqual(HttpMethod.POST) && httpRequest.isPathStartingWith(LOGIN_USER_PATH)) {
+                doPostLoginUser(httpRequest, dos, body);
+                return;
+            }
+
             standardResponse(dos, body, httpRequest);
         } catch (final Exception e) {
             logger.error(e.getMessage());
         }
     }
 
-    private boolean isCreateUserRequest(final HttpRequest httpRequest) {
-        return httpRequest.isPathStartingWith(CREATE_USER_PATH) && isUserCreatable(httpRequest);
+    private void doPostCreateUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
+        final Map<String, String> queryParams = httpRequest.getBody();
+        if (DataBase.isAlreadyExistId(queryParams.get(USER_ID))) {
+            return;
+        }
+        DataBase.addUser(User.of(queryParams));
+        redirectResponse(dos, body, LOCATION_INDEX_HTML);
     }
 
-    private void redirectResponse(final DataOutputStream dos, final byte[] body) {
-        redirectHeader(dos);
+    private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
+        final Map<String, String> queryParams = httpRequest.getBody();
+        if (DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
+            redirectResponse(dos, body, LOCATION_INDEX_HTML);
+            return;
+        }
+        redirectResponse(dos, body, LOCATION_LONGIN_FAILED_HTML);
+    }
+
+    private void redirectResponse(final DataOutputStream dos, final byte[] body, String location) {
+        redirectHeader(dos, location);
         responseBody(dos, body);
     }
 
     private void standardResponse(final DataOutputStream dos, final byte[] body, final HttpRequest httpRequest) {
         response200Header(dos, body.length, httpRequest);
         responseBody(dos, body);
-    }
-
-    private boolean isUserCreatable(final HttpRequest httpRequest) {
-        final Map<String, String> queryParams = httpRequest.getBody();
-        final User user = User.of(queryParams);
-        if (DataBase.findUserById(user.getUserId()).isPresent()) {
-            return false;
-        }
-        DataBase.addUser(user);
-        return true;
     }
 
     private byte[] makeBody(final HttpRequest httpRequest) throws Exception {
@@ -112,10 +125,10 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void redirectHeader(DataOutputStream dos) {
+    private void redirectHeader(final DataOutputStream dos, final String location) {
         try {
             dos.writeBytes(HTTP_1_1_302_REDIRECT);
-            dos.writeBytes(LOCATION_INDEX_HTML);
+            dos.writeBytes(location);
             dos.writeBytes(CRLF);
         } catch (IOException e) {
             logger.error(e.getMessage());
