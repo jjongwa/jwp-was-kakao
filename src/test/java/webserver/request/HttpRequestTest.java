@@ -8,7 +8,7 @@ import utils.FileIoUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CustomHttpRequestTest {
+class HttpRequestTest {
     @Test
     void GET_index_요청에_대해_해당하는_html_파일을_전달한다() throws Exception{
         // given

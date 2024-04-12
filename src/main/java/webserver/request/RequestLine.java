@@ -1,6 +1,6 @@
 package webserver.request;
 
-public class CustomRequestLine {
+public class RequestLine {
 
     private static final String FIRST_LINE_SEPARATOR = " ";
     private static final int ZERO = 0;
@@ -9,14 +9,14 @@ public class CustomRequestLine {
     private final HttpMethod method;
     private final RequestPath path;
 
-    private CustomRequestLine(final HttpMethod method, final RequestPath path) {
+    private RequestLine(final HttpMethod method, final RequestPath path) {
         this.method = method;
         this.path = path;
     }
 
-    public static CustomRequestLine from(final String firstLine) {
+    public static RequestLine from(final String firstLine) {
         final String[] split = firstLine.split(FIRST_LINE_SEPARATOR);
-        return new CustomRequestLine(HttpMethod.find(split[ZERO]), RequestPath.from(split[ONE]));
+        return new RequestLine(HttpMethod.find(split[ZERO]), RequestPath.from(split[ONE]));
     }
 
     public boolean checkMethod(final HttpMethod method) {

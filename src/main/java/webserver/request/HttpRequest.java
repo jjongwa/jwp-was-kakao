@@ -7,29 +7,29 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CustomRequest {
+public class HttpRequest {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String EMPTY_BODY = "";
 
-    private final CustomRequestLine line;
+    private final RequestLine line;
     private final RequestHeaders headers;
     private final RequestBody body;
 
-    public CustomRequest(final CustomRequestLine line, final RequestHeaders headers, final RequestBody body) {
+    public HttpRequest(final RequestLine line, final RequestHeaders headers, final RequestBody body) {
         this.line = line;
         this.headers = headers;
         this.body = body;
     }
 
-    public static CustomRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
         final RequestHeaders requestHeaders = readHeaders(bufferedReader);
 
         final RequestBody requestBody = readBodyIfPresent(bufferedReader, requestHeaders);
 
-        return new CustomRequest(
-                CustomRequestLine.from(firstLine),
+        return new HttpRequest(
+                RequestLine.from(firstLine),
                 requestHeaders,
                 requestBody
         );

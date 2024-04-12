@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileIoUtils;
 import webserver.request.HttpMethod;
-import webserver.request.CustomRequest;
+import webserver.request.HttpRequest;
 
 import java.io.*;
 import java.net.Socket;
@@ -54,24 +54,24 @@ public class RequestHandler implements Runnable {
                 final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
                 final DataOutputStream dos = new DataOutputStream(out)
         ) {
-            final CustomRequest customRequest = CustomRequest.makeRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequest.makeRequest(bufferedReader);
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
 
-            if (customRequest.isMethodEqual(HttpMethod.GET)) {
-                body = makeBody(customRequest);
+            if (httpRequest.isMethodEqual(HttpMethod.GET)) {
+                body = makeBody(httpRequest);
             }
-            if (customRequest.isMethodEqual(HttpMethod.POST) && isCreateUserRequest(customRequest)) {
+            if (httpRequest.isMethodEqual(HttpMethod.POST) && isCreateUserRequest(httpRequest)) {
                 redirectResponse(dos, body);
                 return;
             }
-            standardResponse(dos, body, customRequest);
+            standardResponse(dos, body, httpRequest);
         } catch (final Exception e) {
             logger.error(e.getMessage());
         }
     }
 
-    private boolean isCreateUserRequest(final CustomRequest customRequest) {
-        return customRequest.isPathStartingWith(CREATE_USER_PATH) && isUserCreatable(customRequest);
+    private boolean isCreateUserRequest(final HttpRequest httpRequest) {
+        return httpRequest.isPathStartingWith(CREATE_USER_PATH) && isUserCreatable(httpRequest);
     }
 
     private void redirectResponse(final DataOutputStream dos, final byte[] body) {
@@ -79,13 +79,13 @@ public class RequestHandler implements Runnable {
         responseBody(dos, body);
     }
 
-    private void standardResponse(final DataOutputStream dos, final byte[] body, final CustomRequest customRequest) {
-        response200Header(dos, body.length, customRequest);
+    private void standardResponse(final DataOutputStream dos, final byte[] body, final HttpRequest httpRequest) {
+        response200Header(dos, body.length, httpRequest);
         responseBody(dos, body);
     }
 
-    private boolean isUserCreatable(final CustomRequest customRequest) {
-        final Map<String, String> queryParams = customRequest.getBody();
+    private boolean isUserCreatable(final HttpRequest httpRequest) {
+        final Map<String, String> queryParams = httpRequest.getBody();
         final User user = User.of(queryParams);
         if (DataBase.findUserById(user.getUserId()).isPresent()) {
             return false;
@@ -94,17 +94,17 @@ public class RequestHandler implements Runnable {
         return true;
     }
 
-    private byte[] makeBody(final CustomRequest customRequest) throws Exception {
-        if (customRequest.isPathEqual(DEFALUT_PAGE_PATH)) {
+    private byte[] makeBody(final HttpRequest httpRequest) throws Exception {
+        if (httpRequest.isPathEqual(DEFALUT_PAGE_PATH)) {
             return FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
         }
-        return FileIoUtils.loadFileFromClasspath(customRequest.findFilePath());
+        return FileIoUtils.loadFileFromClasspath(httpRequest.findFilePath());
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, CustomRequest customRequest) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, HttpRequest httpRequest) {
         try {
             dos.writeBytes(HTTP_1_1_200_OK);
-            dos.writeBytes(CONTENT_TYPE_KEY + customRequest.findContentType() + CRLF);
+            dos.writeBytes(CONTENT_TYPE_KEY + httpRequest.findContentType() + CRLF);
             dos.writeBytes(CONTENT_LENGTH_KEY + lengthOfBodyContent + CRLF);
             dos.writeBytes(CRLF);
         } catch (IOException e) {
