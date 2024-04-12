@@ -26,7 +26,7 @@ public class RequestBody {
     }
 
     public static RequestBody parse(final String bodyLine) {
-        if (bodyLine == null) {
+        if (bodyLine == null || bodyLine.isEmpty()) {
             return RequestBody.empty();
         }
         return Arrays.stream(bodyLine.split(DELIMITER))
