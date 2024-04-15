@@ -39,6 +39,9 @@ public class HttpCookie {
     }
 
     public String getValueByKey(final String key) {
+        if (key == null || key.isEmpty() || !elements.containsKey(key)) {
+            return null;
+        }
         return elements.get(key);
     }
 

@@ -51,6 +51,7 @@ public class RequestHandler implements Runnable {
     private static final String TRUE = "true";
 
     private Socket connection;
+    private SessionManager sessionManager = SessionManager.getInstance();
 
     public RequestHandler(final Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -82,6 +83,10 @@ public class RequestHandler implements Runnable {
 
             if (httpRequest.isMethodEqual(HttpMethod.GET) && httpRequest.isPathEqual(USER_LIST_PATH)) {
                 doGetUserList(body, dos, httpRequest, cookie);
+                return;
+            }
+            if (httpRequest.isMethodEqual(HttpMethod.GET) && httpRequest.isPathStartingWith(LOGIN_USER_PATH) && sessionManager.findSession(cookie.getValueByKey(JSESSIONID)) != null) {
+                redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
                 return;
             }
             if (httpRequest.isMethodEqual(HttpMethod.GET)) {
@@ -137,8 +142,13 @@ public class RequestHandler implements Runnable {
 
     private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body, final HttpCookie cookie) {
         final Map<String, String> queryParams = httpRequest.getBody();
+        if (sessionManager.findSession(cookie.getValueByKey(JSESSIONID)) != null) {
+            redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
+            return;
+        }
         if (DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
-            writeJSessionId(cookie);
+            final String uuid = writeJSessionId(cookie);
+            makeSession(uuid, queryParams);
             cookie.setCookie(LOGINED, TRUE);
             redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
             return;
@@ -146,10 +156,20 @@ public class RequestHandler implements Runnable {
         redirectResponse(dos, body, LOCATION_LONGIN_FAILED_HTML, cookie);
     }
 
-    private void writeJSessionId(final HttpCookie cookie) {
-        if (!cookie.containsKey(JSESSIONID)) {
-            cookie.setCookie(JSESSIONID, UUID.randomUUID() + COOKIE_PATH_POSTFIX);
+    private void makeSession(final String uuid, final Map<String, String> queryParams) {
+        if (sessionManager.findSession(uuid) == null) {
+            final Session session = sessionManager.add(uuid);
+            session.setAttribute("user", DataBase.findUserById(queryParams.get(USER_ID)).get());
         }
+    }
+
+    private String writeJSessionId(final HttpCookie cookie) {
+        if (!cookie.containsKey(JSESSIONID)) {
+            final UUID uuid = UUID.randomUUID();
+            cookie.setCookie(JSESSIONID, uuid + COOKIE_PATH_POSTFIX);
+            return uuid.toString();
+        }
+        return cookie.getValueByKey(JSESSIONID);
     }
 
     private void redirectResponse(final DataOutputStream dos, final byte[] body, String location, final HttpCookie cookie) {

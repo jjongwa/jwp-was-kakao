@@ -22,6 +22,9 @@ public class SessionManager {
     }
 
     public Session findSession(final String id) {
+        if (id == null || !SESSIONS.containsKey(id)) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 
