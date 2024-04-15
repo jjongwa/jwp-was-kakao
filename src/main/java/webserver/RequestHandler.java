@@ -1,5 +1,9 @@
 package webserver;
 
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
@@ -10,7 +14,10 @@ import webserver.request.HttpRequest;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class RequestHandler implements Runnable {
@@ -26,7 +33,7 @@ public class RequestHandler implements Runnable {
     private static final String CONTENT_LENGTH_KEY = "Content-Length: ";
     private static final String LOCATION_INDEX_HTML = "Location: /index.html " + CRLF;
     private static final String LOCATION_LONGIN_FAILED_HTML = "Location: /user/login_failed.html " + CRLF;
-    private static final String DEFALUT_PAGE_PATH = "/";
+    private static final String DEFAULT_PAGE_PATH = "/";
     private static final int OFFSET_ZERO = 0;
     private static final String DEFAULT_PAGE_MESSAGE = "Hello, World!";
     private static final String NEW_CLIENT_CONNECT_MESSAGE = "New Client Connect! Connected IP : {}, Port : {}";
@@ -36,6 +43,12 @@ public class RequestHandler implements Runnable {
     private static final String SET_COOKIE = "Set-Cookie: ";
     private static final String DELIMITER = "=";
     private static final String COOKIE_PATH_POSTFIX = "; Path=/";
+    private static final String USER_LIST_PATH = "/user/list";
+    private static final String LOCATION_USER_LOGIN_PATH = "Location: /user/login.html";
+    private static final String PREFIX_TEMPLATES = "/templates";
+    private static final String SURFFIX_HTML = ".html";
+    private static final String LOGINED = "logined";
+    private static final String TRUE = "true";
 
     private Socket connection;
 
@@ -67,6 +80,10 @@ public class RequestHandler implements Runnable {
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
             final HttpCookie cookie = HttpCookie.from(httpRequest.getHeaders().getValueByKey("Cookie"));
 
+            if (httpRequest.isMethodEqual(HttpMethod.GET) && httpRequest.isPathEqual(USER_LIST_PATH)) {
+                doGetUserList(body, dos, httpRequest, cookie);
+                return;
+            }
             if (httpRequest.isMethodEqual(HttpMethod.GET)) {
                 body = makeBody(httpRequest);
             }
@@ -85,6 +102,30 @@ public class RequestHandler implements Runnable {
         }
     }
 
+    private void doGetUserList(byte[] body, final DataOutputStream dos, final HttpRequest httpRequest, final HttpCookie cookie) {
+        if (Objects.equals(cookie.getValueByKey(LOGINED), TRUE)) {
+            try {
+                final TemplateLoader loader = new ClassPathTemplateLoader();
+                loader.setPrefix(PREFIX_TEMPLATES);
+                loader.setSuffix(SURFFIX_HTML);
+                final Handlebars handlebars = new Handlebars(loader);
+
+                final Template template = handlebars.compile(USER_LIST_PATH);
+
+                final Map<String, Object> model = new HashMap<>();
+                model.put("users", DataBase.findAll());
+                final String userListPage = template.apply(model);
+                body = userListPage.getBytes(StandardCharsets.UTF_8);
+                response200Header(dos, body.length, httpRequest);
+                responseBody(dos, body);
+                return;
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+        }
+        redirectHeader(dos, LOCATION_USER_LOGIN_PATH + CRLF, cookie);
+    }
+
     private void doPostCreateUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body, final HttpCookie cookie) {
         final Map<String, String> queryParams = httpRequest.getBody();
         if (DataBase.isAlreadyExistId(queryParams.get(USER_ID))) {
@@ -98,6 +139,7 @@ public class RequestHandler implements Runnable {
         final Map<String, String> queryParams = httpRequest.getBody();
         if (DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
             writeJSessionId(cookie);
+            cookie.setCookie(LOGINED, TRUE);
             redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
             return;
         }
@@ -121,7 +163,7 @@ public class RequestHandler implements Runnable {
     }
 
     private byte[] makeBody(final HttpRequest httpRequest) throws Exception {
-        if (httpRequest.isPathEqual(DEFALUT_PAGE_PATH)) {
+        if (httpRequest.isPathEqual(DEFAULT_PAGE_PATH)) {
             return FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
         }
         return FileIoUtils.loadFileFromClasspath(httpRequest.findFilePath());

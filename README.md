@@ -112,8 +112,8 @@
   * [x] 로그인 성공 시 index.html로 Redirect 응답을 보낼 수 있다.
   * [x] 로그인 실패 시 login_failed.html로 Redirect 응답을 보낼 수 있다.
 
-* [ ] 템플릿 엔진을 활용할 수 있다.
-  * [ ] Handlebars를 활용할 수 있다. 
+* [x] 템플릿 엔진을 활용할 수 있다.
+  * [x] Handlebars를 활용할 수 있다. 
 
 * [ ] Session을 구현할 수 있다.
   * [ ] 로그인 상태를 체크할 수 있다.
