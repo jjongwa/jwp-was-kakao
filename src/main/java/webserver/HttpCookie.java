@@ -41,4 +41,8 @@ public class HttpCookie {
     public String getValueByKey(final String key) {
         return elements.get(key);
     }
+
+    public Map<String, String> getElements() {
+        return elements;
+    }
 }

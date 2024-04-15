@@ -74,4 +74,8 @@ public class HttpRequest {
     public String findFilePath() {
         return line.getFilePath();
     }
+
+    public RequestHeaders getHeaders() {
+        return headers;
+    }
 }

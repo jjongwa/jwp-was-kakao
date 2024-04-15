@@ -22,6 +22,15 @@ public class RequestHeaders {
                 .collect(Collectors.toMap(split -> split[KEY_INDEX], split -> split[VALUE_INDEX]));
     }
 
+    public List<String> getAllKeys() {
+        return elements.keySet().stream()
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public String getValueByKey(final String key) {
+        return elements.get(key);
+    }
+
     public Map<String, String> getElements() {
         return elements;
     }

@@ -11,6 +11,7 @@ import webserver.request.HttpRequest;
 import java.io.*;
 import java.net.Socket;
 import java.util.Map;
+import java.util.UUID;
 
 public class RequestHandler implements Runnable {
 
@@ -31,6 +32,10 @@ public class RequestHandler implements Runnable {
     private static final String NEW_CLIENT_CONNECT_MESSAGE = "New Client Connect! Connected IP : {}, Port : {}";
     private static final String USER_ID = "userId";
     private static final String PASSWORD = "password";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String SET_COOKIE = "Set-Cookie: ";
+    private static final String DELIMITER = "=";
+    private static final String COOKIE_PATH_POSTFIX = "; Path=/";
 
     private Socket connection;
 
@@ -60,16 +65,17 @@ public class RequestHandler implements Runnable {
         ) {
             final HttpRequest httpRequest = HttpRequest.makeRequest(bufferedReader);
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
+            final HttpCookie cookie = HttpCookie.from(httpRequest.getHeaders().getValueByKey("Cookie"));
 
             if (httpRequest.isMethodEqual(HttpMethod.GET)) {
                 body = makeBody(httpRequest);
             }
             if (httpRequest.isMethodEqual(HttpMethod.POST) && httpRequest.isPathStartingWith(CREATE_USER_PATH)) {
-                doPostCreateUser(httpRequest, dos, body);
+                doPostCreateUser(httpRequest, dos, body, cookie);
                 return;
             }
             if (httpRequest.isMethodEqual(HttpMethod.POST) && httpRequest.isPathStartingWith(LOGIN_USER_PATH)) {
-                doPostLoginUser(httpRequest, dos, body);
+                doPostLoginUser(httpRequest, dos, body, cookie);
                 return;
             }
 
@@ -79,26 +85,33 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void doPostCreateUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
+    private void doPostCreateUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body, final HttpCookie cookie) {
         final Map<String, String> queryParams = httpRequest.getBody();
         if (DataBase.isAlreadyExistId(queryParams.get(USER_ID))) {
             return;
         }
         DataBase.addUser(User.of(queryParams));
-        redirectResponse(dos, body, LOCATION_INDEX_HTML);
+        redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
     }
 
-    private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
+    private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body, final HttpCookie cookie) {
         final Map<String, String> queryParams = httpRequest.getBody();
         if (DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
-            redirectResponse(dos, body, LOCATION_INDEX_HTML);
+            writeJSessionId(cookie);
+            redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
             return;
         }
-        redirectResponse(dos, body, LOCATION_LONGIN_FAILED_HTML);
+        redirectResponse(dos, body, LOCATION_LONGIN_FAILED_HTML, cookie);
     }
 
-    private void redirectResponse(final DataOutputStream dos, final byte[] body, String location) {
-        redirectHeader(dos, location);
+    private void writeJSessionId(final HttpCookie cookie) {
+        if (!cookie.containsKey(JSESSIONID)) {
+            cookie.setCookie(JSESSIONID, UUID.randomUUID() + COOKIE_PATH_POSTFIX);
+        }
+    }
+
+    private void redirectResponse(final DataOutputStream dos, final byte[] body, String location, final HttpCookie cookie) {
+        redirectHeader(dos, location, cookie);
         responseBody(dos, body);
     }
 
@@ -125,10 +138,13 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void redirectHeader(final DataOutputStream dos, final String location) {
+    private void redirectHeader(final DataOutputStream dos, final String location, final HttpCookie cookie) {
         try {
             dos.writeBytes(HTTP_1_1_302_REDIRECT);
             dos.writeBytes(location);
+            for (final String key : cookie.getElements().keySet()) {
+                dos.writeBytes(SET_COOKIE + key + DELIMITER + cookie.getValueByKey(key) + CRLF);
+            }
             dos.writeBytes(CRLF);
         } catch (IOException e) {
             logger.error(e.getMessage());
