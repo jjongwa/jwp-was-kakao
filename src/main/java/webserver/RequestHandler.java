@@ -1,21 +1,16 @@
 package webserver;
 
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
-import com.github.jknack.handlebars.io.TemplateLoader;
 import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileIoUtils;
+import utils.HtmlPageBuilder;
 import webserver.request.HttpMethod;
 import webserver.request.HttpRequest;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -45,8 +40,7 @@ public class RequestHandler implements Runnable {
     private static final String COOKIE_PATH_POSTFIX = "; Path=/";
     private static final String USER_LIST_PATH = "/user/list";
     private static final String LOCATION_USER_LOGIN_PATH = "Location: /user/login.html";
-    private static final String PREFIX_TEMPLATES = "/templates";
-    private static final String SURFFIX_HTML = ".html";
+
     private static final String LOGINED = "logined";
     private static final String TRUE = "true";
     private static final String USER_KEY = "user";
@@ -113,17 +107,7 @@ public class RequestHandler implements Runnable {
         final HttpCookie cookie = httpRequest.getCookie();
         if (Objects.equals(cookie.getValueByKey(LOGINED), TRUE)) {
             try {
-                final TemplateLoader loader = new ClassPathTemplateLoader();
-                loader.setPrefix(PREFIX_TEMPLATES);
-                loader.setSuffix(SURFFIX_HTML);
-                final Handlebars handlebars = new Handlebars(loader);
-
-                final Template template = handlebars.compile(USER_LIST_PATH);
-
-                final Map<String, Object> model = new HashMap<>();
-                model.put("users", DataBase.findAll());
-                final String userListPage = template.apply(model);
-                body = userListPage.getBytes(StandardCharsets.UTF_8);
+                body = HtmlPageBuilder.buildUserListPage();
                 response200Header(dos, body.length, httpRequest);
                 responseBody(dos, body);
                 return;
