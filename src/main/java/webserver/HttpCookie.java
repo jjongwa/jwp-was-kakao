@@ -32,7 +32,7 @@ public class HttpCookie {
         );
     }
 
-    public void setCookie(final String key, final String value) {
+    public void addElement(final String key, final String value) {
         elements.put(key, value);
     }
 

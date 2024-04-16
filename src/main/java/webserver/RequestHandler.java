@@ -49,6 +49,7 @@ public class RequestHandler implements Runnable {
     private static final String SURFFIX_HTML = ".html";
     private static final String LOGINED = "logined";
     private static final String TRUE = "true";
+    private static final String USER_KEY = "user";
 
     private Socket connection;
     private SessionManager sessionManager = SessionManager.getInstance();
@@ -152,7 +153,7 @@ public class RequestHandler implements Runnable {
         if (DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
             final String uuid = writeJSessionId(cookie);
             makeSession(uuid, queryParams);
-            cookie.setCookie(LOGINED, TRUE);
+            cookie.addElement(LOGINED, TRUE);
             redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
             return;
         }
@@ -163,14 +164,14 @@ public class RequestHandler implements Runnable {
         if (sessionManager.findSession(uuid) == null) {
             sessionManager.add(uuid);
             final Session session = sessionManager.findSession(uuid);
-            session.setAttribute("user", DataBase.findUserById(queryParams.get(USER_ID)).get());
+            session.setAttribute(USER_KEY, DataBase.findUserById(queryParams.get(USER_ID)).get());
         }
     }
 
     private String writeJSessionId(final HttpCookie cookie) {
         if (!cookie.containsKey(JSESSIONID)) {
             final UUID uuid = UUID.randomUUID();
-            cookie.setCookie(JSESSIONID, uuid + COOKIE_PATH_POSTFIX);
+            cookie.addElement(JSESSIONID, uuid + COOKIE_PATH_POSTFIX);
             return uuid.toString();
         }
         return cookie.getValueByKey(JSESSIONID);

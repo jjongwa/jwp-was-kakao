@@ -28,7 +28,7 @@ class HttpCookieTest {
         final HttpCookie cookie = HttpCookie.from(cookieHeader);
 
         // when
-        cookie.setCookie("good", "dino");
+        cookie.addElement("good", "dino");
 
         // then
         assertThat(cookie.getValueByKey("good")).isEqualTo("dino");
