@@ -15,10 +15,8 @@ public class SessionManager {
         return instance;
     }
 
-    public Session add(final String sessionId) {
-        Session session = new Session(sessionId);
-        SESSIONS.put(sessionId, session);
-        return session;
+    public void add(final String sessionId) {
+        SESSIONS.put(sessionId, new Session(sessionId));
     }
 
     public Session findSession(final String id) {

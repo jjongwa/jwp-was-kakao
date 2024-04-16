@@ -17,11 +17,14 @@ class SessionManagerTest {
     void 새로운_세션을_추가할_수_있다() {
         // given
         final String sessionId = "uniqueSessionId";
+        final Session expected = new Session(sessionId);
 
         // when
-        final Session session = sessionManager.add(sessionId);
+        sessionManager.add(sessionId);
 
-        assertThat(sessionManager.findSession(sessionId)).isEqualTo(session);
+        assertThat(sessionManager.findSession(sessionId))
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 
     @Test

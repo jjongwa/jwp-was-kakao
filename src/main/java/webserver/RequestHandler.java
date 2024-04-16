@@ -161,7 +161,8 @@ public class RequestHandler implements Runnable {
 
     private void makeSession(final String uuid, final Map<String, String> queryParams) {
         if (sessionManager.findSession(uuid) == null) {
-            final Session session = sessionManager.add(uuid);
+            sessionManager.add(uuid);
+            final Session session = sessionManager.findSession(uuid);
             session.setAttribute("user", DataBase.findUserById(queryParams.get(USER_ID)).get());
         }
     }
