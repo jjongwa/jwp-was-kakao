@@ -14,7 +14,9 @@ public class HttpCookie {
 
     private final Map<String, String> elements;
 
-    public static final HttpCookie EMPTY = new HttpCookie(new HashMap<>());
+    private HttpCookie() {
+        this.elements = new HashMap<>();
+    }
 
     private HttpCookie(final Map<String, String> elements) {
         this.elements = elements;
@@ -22,7 +24,7 @@ public class HttpCookie {
 
     public static HttpCookie from(final String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isEmpty()) {
-            return EMPTY;
+            return new HttpCookie();
         }
         return new HttpCookie(Arrays.stream(cookieHeader.split(ELEMENT_SPLIT_REGEX))
                 .map(element -> element.split(KEY_VALUE_SPLIT_REGEX))

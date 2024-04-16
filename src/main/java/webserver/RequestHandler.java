@@ -79,25 +79,26 @@ public class RequestHandler implements Runnable {
         ) {
             final HttpRequest httpRequest = HttpRequest.makeRequest(bufferedReader);
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
-            final HttpCookie cookie = HttpCookie.from(httpRequest.getHeaders().getValueByKey("Cookie"));
-
             if (httpRequest.isMethodEqual(HttpMethod.GET) && httpRequest.isPathEqual(USER_LIST_PATH)) {
-                doGetUserList(body, dos, httpRequest, cookie);
+                doGetUserList(body, dos, httpRequest);
                 return;
             }
-            if (httpRequest.isMethodEqual(HttpMethod.GET) && httpRequest.isPathStartingWith(LOGIN_USER_PATH) && sessionManager.findSession(cookie.getValueByKey(JSESSIONID)) != null) {
-                redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
+            if (httpRequest.isMethodEqual(HttpMethod.GET) &&
+                httpRequest.isPathStartingWith(LOGIN_USER_PATH) &&
+                sessionManager.findSession(httpRequest.getCookie().getValueByKey(JSESSIONID)) != null
+            ) {
+                redirectResponse(dos, body, LOCATION_INDEX_HTML, httpRequest.getCookie());
                 return;
             }
             if (httpRequest.isMethodEqual(HttpMethod.GET)) {
                 body = makeBody(httpRequest);
             }
             if (httpRequest.isMethodEqual(HttpMethod.POST) && httpRequest.isPathStartingWith(CREATE_USER_PATH)) {
-                doPostCreateUser(httpRequest, dos, body, cookie);
+                doPostCreateUser(httpRequest, dos, body);
                 return;
             }
             if (httpRequest.isMethodEqual(HttpMethod.POST) && httpRequest.isPathStartingWith(LOGIN_USER_PATH)) {
-                doPostLoginUser(httpRequest, dos, body, cookie);
+                doPostLoginUser(httpRequest, dos, body);
                 return;
             }
 
@@ -107,7 +108,8 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void doGetUserList(byte[] body, final DataOutputStream dos, final HttpRequest httpRequest, final HttpCookie cookie) {
+    private void doGetUserList(byte[] body, final DataOutputStream dos, final HttpRequest httpRequest) {
+        final HttpCookie cookie = httpRequest.getCookie();
         if (Objects.equals(cookie.getValueByKey(LOGINED), TRUE)) {
             try {
                 final TemplateLoader loader = new ClassPathTemplateLoader();
@@ -131,17 +133,18 @@ public class RequestHandler implements Runnable {
         redirectHeader(dos, LOCATION_USER_LOGIN_PATH + CRLF, cookie);
     }
 
-    private void doPostCreateUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body, final HttpCookie cookie) {
+    private void doPostCreateUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
         final Map<String, String> queryParams = httpRequest.getBody();
         if (DataBase.isAlreadyExistId(queryParams.get(USER_ID))) {
             return;
         }
         DataBase.addUser(User.of(queryParams));
-        redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
+        redirectResponse(dos, body, LOCATION_INDEX_HTML, httpRequest.getCookie());
     }
 
-    private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body, final HttpCookie cookie) {
+    private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
         final Map<String, String> queryParams = httpRequest.getBody();
+        final HttpCookie cookie = httpRequest.getCookie();
         if (sessionManager.findSession(cookie.getValueByKey(JSESSIONID)) != null) {
             redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
             return;

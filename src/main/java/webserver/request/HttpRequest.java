@@ -1,6 +1,7 @@
 package webserver.request;
 
 import utils.IOUtils;
+import webserver.HttpCookie;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,6 +54,10 @@ public class HttpRequest {
 
     public boolean isMethodEqual(final HttpMethod httpMethod) {
         return this.line.checkMethod(httpMethod);
+    }
+
+    public HttpCookie getCookie() {
+        return headers.getCookie();
     }
 
     public boolean isPathStartingWith(final String path) {
