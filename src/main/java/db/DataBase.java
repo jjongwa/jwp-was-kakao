@@ -22,6 +22,15 @@ public class DataBase {
         return Optional.ofNullable(users.get(userId));
     }
 
+    public static boolean isAlreadyExistId(final String id) {
+        return users.containsKey(id);
+    }
+
+    public static boolean isUserExist(final String id, final String password) {
+        return users.values().stream()
+                .anyMatch(user -> user.getUserId().equals(id) && user.getPassword().equals(password));
+    }
+
     public static Collection<User> findAll() {
         return users.values();
     }

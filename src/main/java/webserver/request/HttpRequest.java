@@ -1,6 +1,7 @@
 package webserver.request;
 
 import utils.IOUtils;
+import webserver.HttpCookie;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,6 +56,10 @@ public class HttpRequest {
         return this.line.checkMethod(httpMethod);
     }
 
+    public HttpCookie getCookie() {
+        return headers.getCookie();
+    }
+
     public boolean isPathStartingWith(final String path) {
         return this.line.isPathStartingWith(path);
     }
@@ -73,5 +78,9 @@ public class HttpRequest {
 
     public String findFilePath() {
         return line.getFilePath();
+    }
+
+    public RequestHeaders getHeaders() {
+        return headers;
     }
 }
