@@ -15,14 +15,14 @@ class HttpRequestLineTest {
         final String requestFirstLine = "GET /index.html HTTP/1.1";
 
         // when & then
-        assertDoesNotThrow(() -> RequestLine.from(requestFirstLine));
+        assertDoesNotThrow(() -> RequestLine.create(requestFirstLine));
     }
 
     @Test
     void requestLine이_가진_method가_입력받은_method와_같은지_확인할_수_있다() {
         // given
         final String requestFirstLine = "GET /index.html HTTP/1.1";
-        final RequestLine requestLine = RequestLine.from(requestFirstLine);
+        final RequestLine requestLine = RequestLine.create(requestFirstLine);
 
         // when & then
         assertThat(requestLine.checkMethod(GET)).isTrue();
@@ -32,7 +32,7 @@ class HttpRequestLineTest {
     void requestLine이_가진_path가_입력받은_path와_같은지_확인할_수_있다() {
         // given
         final String requestFirstLine = "GET /index.html HTTP/1.1";
-        final RequestLine requestLine = RequestLine.from(requestFirstLine);
+        final RequestLine requestLine = RequestLine.create(requestFirstLine);
         final String expected = "/index.html";
 
         // when & then
@@ -43,7 +43,7 @@ class HttpRequestLineTest {
     void requestLine이_가진_path가_입력받은_path로_시작하는지_확인할_수_있다() {
         // given
         final String requestFirstLine = "GET /index.html HTTP/1.1";
-        final RequestLine requestLine = RequestLine.from(requestFirstLine);
+        final RequestLine requestLine = RequestLine.create(requestFirstLine);
         final String expected = "/index";
 
         // when & then

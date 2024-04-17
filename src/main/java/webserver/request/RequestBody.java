@@ -1,5 +1,9 @@
 package webserver.request;
 
+import utils.IOUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +18,9 @@ public class RequestBody {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int SPLIT_LIMIT = 2;
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String EMPTY_BODY = "";
+    private static final String DOSE_NOT_EXIST_KEY = "존재하지 않는 key입니다";
 
     private final Map<String, String> elements;
 
@@ -21,14 +28,22 @@ public class RequestBody {
         this.elements = elements;
     }
 
-    public static RequestBody empty() {
-        return new RequestBody(new HashMap<>());
+    public static RequestBody readBodyIfPresent(BufferedReader bufferedReader, RequestHeader requestHeader) throws IOException {
+        if (requestHeader.getElements().containsKey(CONTENT_LENGTH)) {
+            final int contentLength = Integer.parseInt(requestHeader.getElements().get(CONTENT_LENGTH));
+            return RequestBody.parse(IOUtils.readData(bufferedReader, contentLength));
+        }
+        return RequestBody.parse(EMPTY_BODY);
     }
 
-    public static RequestBody parse(final String bodyLine) {
+    private static RequestBody parse(final String bodyLine) {
         if (bodyLine == null || bodyLine.isEmpty()) {
-            return RequestBody.empty();
+            return new RequestBody(new HashMap<>());
         }
+        return makeBody(bodyLine);
+    }
+
+    private static RequestBody makeBody(final String bodyLine) {
         return Arrays.stream(bodyLine.split(DELIMITER))
                 .map(field -> field.split(REGEX, SPLIT_LIMIT))
                 .collect(collectingAndThen(
@@ -39,5 +54,13 @@ public class RequestBody {
 
     public Map<String, String> getBody() {
         return elements;
+    }
+
+    public String getElement(final String key) {
+        final String element = elements.get(key);
+        if (element == null) {
+            throw new IllegalArgumentException(DOSE_NOT_EXIST_KEY);
+        }
+        return element;
     }
 }

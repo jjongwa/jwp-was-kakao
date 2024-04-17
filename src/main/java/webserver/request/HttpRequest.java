@@ -1,55 +1,33 @@
 package webserver.request;
 
-import utils.IOUtils;
 import webserver.HttpCookie;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String EMPTY_BODY = "";
+    private static final String UNSUPPORTED_METHOD = "지원하지 않는 메서드입니다.";
 
     private final RequestLine line;
-    private final RequestHeaders headers;
+    private final RequestHeader headers;
     private final RequestBody body;
 
-    public HttpRequest(final RequestLine line, final RequestHeaders headers, final RequestBody body) {
+    private HttpRequest(final RequestLine line, final RequestHeader headers, final RequestBody body) {
         this.line = line;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
-        final String firstLine = bufferedReader.readLine();
-        final RequestHeaders requestHeaders = readHeaders(bufferedReader);
-
-        final RequestBody requestBody = readBodyIfPresent(bufferedReader, requestHeaders);
-
-        return new HttpRequest(
-                RequestLine.from(firstLine),
-                requestHeaders,
-                requestBody
-        );
-    }
-
-    private static RequestHeaders readHeaders(BufferedReader bufferedReader) {
-        return new RequestHeaders(
-                bufferedReader.lines()
-                        .takeWhile(newLine -> newLine != null && !newLine.isEmpty())
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
-
-    private static RequestBody readBodyIfPresent(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
-        if (requestHeaders.getElements().containsKey(CONTENT_LENGTH)) {
-            final int contentLength = Integer.parseInt(requestHeaders.getElements().get(CONTENT_LENGTH));
-            return RequestBody.parse(IOUtils.readData(bufferedReader, contentLength));
-        }
-        return RequestBody.parse(EMPTY_BODY);
+    public static HttpRequest create(final InputStream in) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+        final RequestLine requestLine = RequestLine.create(bufferedReader.readLine());
+        final RequestHeader requestHeader = RequestHeader.create(bufferedReader);
+        final RequestBody requestBody = RequestBody.readBodyIfPresent(bufferedReader, requestHeader);
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
     public boolean isMethodEqual(final HttpMethod httpMethod) {
@@ -80,7 +58,25 @@ public class HttpRequest {
         return line.getFilePath();
     }
 
-    public RequestHeaders getHeaders() {
-        return headers;
+    public String getMethod() {
+        return line.getMethod().name();
+    }
+
+    public String getPath() {
+        return line.getPath();
+    }
+
+    public String getHeader(final String key) {
+        return headers.getElement(key);
+    }
+
+    public String getParameter(final String key) {
+        if (line.getMethod() == HttpMethod.GET) {
+            return line.getParameter(key);
+        }
+        if (line.getMethod() == HttpMethod.POST) {
+            return body.getElement(key);
+        }
+        throw new IllegalArgumentException(UNSUPPORTED_METHOD);
     }
 }

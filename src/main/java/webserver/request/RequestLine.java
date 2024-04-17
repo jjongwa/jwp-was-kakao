@@ -14,7 +14,7 @@ public class RequestLine {
         this.path = path;
     }
 
-    public static RequestLine from(final String firstLine) {
+    public static RequestLine create(final String firstLine) {
         final String[] split = firstLine.split(FIRST_LINE_SEPARATOR);
         return new RequestLine(HttpMethod.find(split[ZERO]), RequestPath.from(split[ONE]));
     }
@@ -37,5 +37,17 @@ public class RequestLine {
 
     public String getFilePath() {
         return this.path.getDirectory() + this.path.getResource();
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path.getResource();
+    }
+
+    public String getParameter(final String key) {
+        return path.getParameter(key);
     }
 }

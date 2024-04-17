@@ -2,11 +2,12 @@ package webserver.request;
 
 import webserver.HttpCookie;
 
+import java.io.BufferedReader;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RequestHeaders {
+public class RequestHeader {
 
     private static final String SPLIT_REGEX = ": ";
     private static final int VALUE_INDEX = 1;
@@ -15,8 +16,16 @@ public class RequestHeaders {
 
     private final Map<String, String> elements;
 
-    public RequestHeaders(final List<String> headersInput) {
+    public RequestHeader(final List<String> headersInput) {
         this.elements = parseHeaders(headersInput);
+    }
+
+    public static RequestHeader create(final BufferedReader bufferedReader) {
+        return new RequestHeader(
+                bufferedReader.lines()
+                        .takeWhile(newLine -> newLine != null && !newLine.isEmpty())
+                        .collect(Collectors.toUnmodifiableList())
+        );
     }
 
     private Map<String, String> parseHeaders(final List<String> headersInput) {
@@ -25,20 +34,15 @@ public class RequestHeaders {
                 .collect(Collectors.toMap(split -> split[KEY_INDEX], split -> split[VALUE_INDEX]));
     }
 
-    public List<String> getAllKeys() {
-        return elements.keySet().stream()
-                .collect(Collectors.toUnmodifiableList());
-    }
-
-    public String getValueByKey(final String key) {
-        return elements.get(key);
-    }
-
     public HttpCookie getCookie() {
         return HttpCookie.from(elements.get(COOKIE_KEY));
     }
 
     public Map<String, String> getElements() {
         return elements;
+    }
+
+    public String getElement(final String key) {
+        return elements.get(key);
     }
 }

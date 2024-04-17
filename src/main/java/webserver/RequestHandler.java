@@ -9,7 +9,10 @@ import utils.HtmlPageBuilder;
 import webserver.request.HttpMethod;
 import webserver.request.HttpRequest;
 
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Objects;
@@ -69,10 +72,9 @@ public class RequestHandler implements Runnable {
         try (
                 final InputStream in = connection.getInputStream();
                 final OutputStream out = connection.getOutputStream();
-                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
                 final DataOutputStream dos = new DataOutputStream(out)
         ) {
-            final HttpRequest httpRequest = HttpRequest.makeRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequest.create(in);
             byte[] body = DEFAULT_PAGE_MESSAGE.getBytes();
             if (httpRequest.isMethodEqual(HttpMethod.GET) && httpRequest.isPathEqual(USER_LIST_PATH)) {
                 doGetUserList(body, dos, httpRequest);

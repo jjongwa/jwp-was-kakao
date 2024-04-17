@@ -10,6 +10,7 @@ public class QueryParameter {
     private static final String PARAMETER_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String DOSE_NOT_EXIST_KEY = "존재하지 않는 key입니다";
 
     private final Map<String, String> params;
 
@@ -42,5 +43,13 @@ public class QueryParameter {
 
     public Map<String, String> getParams() {
         return params;
+    }
+
+    public String getParam(final String key) {
+        final String value = params.get(key);
+        if (value == null) {
+            throw new IllegalArgumentException(DOSE_NOT_EXIST_KEY);
+        }
+        return value;
     }
 }
