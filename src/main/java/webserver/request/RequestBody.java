@@ -29,8 +29,8 @@ public class RequestBody {
     }
 
     public static RequestBody readBodyIfPresent(BufferedReader bufferedReader, RequestHeader requestHeader) throws IOException {
-        if (requestHeader.getElements().containsKey(CONTENT_LENGTH)) {
-            final int contentLength = Integer.parseInt(requestHeader.getElements().get(CONTENT_LENGTH));
+        if (requestHeader.getHeaders().containsKey(CONTENT_LENGTH)) {
+            final int contentLength = Integer.parseInt(requestHeader.getHeaders().get(CONTENT_LENGTH));
             return RequestBody.parse(IOUtils.readData(bufferedReader, contentLength));
         }
         return RequestBody.parse(EMPTY_BODY);

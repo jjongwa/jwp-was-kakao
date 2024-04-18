@@ -2,52 +2,55 @@ package webserver;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SuppressWarnings("NonAsciiCharacters")
 class HttpCookieTest {
 
-    @Test
-    void 쿠키_값을_파싱해_map으로_저장할_수_있다() {
-        // given
-        final String cookieHeader = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46; Path=/";
-        final HttpCookie cookie = HttpCookie.from(cookieHeader);
+    private static final List<String> HEADERS_INPUT = List.of(
+            "Host: localhost:8080\n"
+            , "Connection: keep-alive\n"
+            , "Accept: */*\n"
+            , "Cookie: JSESSIONID=1234; Path=/\n"
+    );
 
-        // when & then
+    @Test
+    void 헤더_리스트에서_쿠키를_만들_수_있다() {
+        // when
+        final HttpCookie httpCookie = HttpCookie.fromRequestInput(HEADERS_INPUT);
+
+        // then
         assertAll(
-                () -> assertThat(cookie.getValue("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46"),
-                () -> assertThat(cookie.getValue("Path")).isEqualTo("/")
+                () -> assertThat(httpCookie.getValue("JSESSIONID")).isEqualTo("1234"),
+                () -> assertThat(httpCookie.getValue("Path")).isEqualTo("/")
         );
     }
 
     @Test
     void 쿠키에_새로운_element를_추가할_수_있다() {
         // given
-        final String cookieHeader = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46; Path=/";
-        final HttpCookie cookie = HttpCookie.from(cookieHeader);
+        final HttpCookie httpCookie = HttpCookie.fromRequestInput(HEADERS_INPUT);
 
         // when
-        cookie.addElement("good", "dino");
+        httpCookie.addElement("good", "dino");
 
         // then
-        assertThat(cookie.getValue("good")).isEqualTo("dino");
+        assertThat(httpCookie.getValue("good")).isEqualTo("dino");
     }
 
     @Test
     void key에_해당하는_value_가_존재하는지_여부를_확인할_수_있다() {
-        // given
-        final String cookieHeader = "cookie1=one; cookie2=two; cookie3=three";
-
-        final HttpCookie cookie = HttpCookie.from(cookieHeader);
-
         // when
+        final HttpCookie httpCookie = HttpCookie.fromRequestInput(HEADERS_INPUT);
 
         // then
         assertAll(
-                () -> assertThat(cookie.containsKey("cookie1")).isTrue(),
-                () -> assertThat(cookie.containsKey("cookie2")).isTrue(),
-                () -> assertThat(cookie.containsKey("cookie3")).isTrue()
+                () -> assertThat(httpCookie.containsKey("JSESSIONID")).isTrue(),
+                () -> assertThat(httpCookie.containsKey("Path")).isTrue(),
+                () -> assertThat(httpCookie.containsKey("good")).isFalse()
         );
     }
 }

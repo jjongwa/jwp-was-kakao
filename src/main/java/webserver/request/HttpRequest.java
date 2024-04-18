@@ -10,19 +10,16 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private static final String COOKIE_KEY = "Cookie";
     private static final String UNSUPPORTED_METHOD = "지원하지 않는 메서드입니다.";
 
     private final RequestLine line;
-    private final RequestHeader headers;
+    private final RequestHeader header;
     private final RequestBody body;
-    private final HttpCookie cookie;
 
-    private HttpRequest(final RequestLine line, final RequestHeader headers, final RequestBody body, final HttpCookie cookie) {
+    private HttpRequest(final RequestLine line, final RequestHeader header, final RequestBody body) {
         this.line = line;
-        this.headers = headers;
+        this.header = header;
         this.body = body;
-        this.cookie = cookie;
     }
 
     public static HttpRequest create(final InputStream in) throws IOException {
@@ -30,8 +27,7 @@ public class HttpRequest {
         final RequestLine requestLine = RequestLine.create(bufferedReader.readLine());
         final RequestHeader requestHeader = RequestHeader.create(bufferedReader);
         final RequestBody requestBody = RequestBody.readBodyIfPresent(bufferedReader, requestHeader);
-        final HttpCookie cookie = HttpCookie.from(requestHeader.getElement(COOKIE_KEY));
-        return new HttpRequest(requestLine, requestHeader, requestBody, cookie);
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
     public boolean isMethodEqual(final HttpMethod httpMethod) {
@@ -39,7 +35,7 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        return cookie;
+        return header.getCookie();
     }
 
     public boolean isPathStartingWith(final String path) {
@@ -71,7 +67,7 @@ public class HttpRequest {
     }
 
     public String getHeader(final String key) {
-        return headers.getElement(key);
+        return header.getElement(key);
     }
 
     public String getParameter(final String key) {

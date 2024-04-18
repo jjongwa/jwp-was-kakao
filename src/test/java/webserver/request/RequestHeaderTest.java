@@ -1,31 +1,34 @@
 package webserver.request;
 
 import org.junit.jupiter.api.Test;
+import webserver.HttpCookie;
 
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.StringReader;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SuppressWarnings("NonAsciiCharacters")
 class RequestHeaderTest {
 
     @Test
-    void Request_Header를_입력_받았을_때_각_key에_해당하는_value를_매칭할_수_있다() {
-        // given
-        final List<String> headerInput = List.of("Host: localhost:8080\n"
-                , "Connection: keep-alive\n"
-                , "Accept: */*\n");
+    void bufferdReader에서_올바르게_Request를_생성할_수_있다() {
+        // Given
+        final String inputData = "Host: localhost\nUser-Agent: JUnitTest\nCookie: sessionId=abc123; Path=/; dino=good\n\n";
+        final BufferedReader reader = new BufferedReader(new StringReader(inputData));
 
-        // when
-        final RequestHeader requestHeader = new RequestHeader(headerInput);
-        final Map<String, String> values = requestHeader.getElements();
+        // When
+        final RequestHeader requestHeader = RequestHeader.create(reader);
+        final HttpCookie cookie = requestHeader.getCookie();
 
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(values).containsEntry("Host", "localhost:8080\n");
-            softly.assertThat(values).containsEntry("Connection", "keep-alive\n");
-            softly.assertThat(values).containsEntry("Accept", "*/*\n");
-        });
+        // Then
+        assertAll(
+                () -> assertThat(requestHeader.getElement("Host")).isEqualTo("localhost"),
+                () -> assertThat(requestHeader.getElement("User-Agent")).isEqualTo("JUnitTest"),
+                () -> assertThat(cookie.getValue("sessionId")).isEqualTo("abc123"),
+                () -> assertThat(cookie.getValue("Path")).isEqualTo("/"),
+                () -> assertThat(cookie.getValue("dino")).isEqualTo("good")
+        );
     }
 }

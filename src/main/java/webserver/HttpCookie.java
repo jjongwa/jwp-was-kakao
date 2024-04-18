@@ -2,16 +2,21 @@ package webserver;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String SPLIT_REGEX = ": ";
     private static final String ELEMENT_SPLIT_REGEX = "; ";
     private static final String KEY_VALUE_SPLIT_REGEX = "=";
     private static final String COOKIE_PATH_SUFFIX = "; Path=/";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final Supplier<String> EMPTY_STRING = ""::toString;
+    private static final String REQUEST_COOKIE_KEY = "Cookie";
 
     private final Map<String, String> elements;
 
@@ -23,7 +28,18 @@ public class HttpCookie {
         this.elements = elements;
     }
 
-    public static HttpCookie from(final String cookieHeader) {
+    public static HttpCookie fromRequestInput(final List<String> headersInput) {
+        return HttpCookie.parse(headersInput.stream()
+                .map(input -> input.split(SPLIT_REGEX))
+                .filter(split -> split[KEY_INDEX].equals(REQUEST_COOKIE_KEY))
+                .findFirst()
+                .map(split -> split[VALUE_INDEX])
+                .orElseGet(EMPTY_STRING)
+                .trim()
+        );
+    }
+
+    private static HttpCookie parse(final String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isEmpty()) {
             return new HttpCookie();
         }
