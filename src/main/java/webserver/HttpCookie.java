@@ -20,12 +20,12 @@ public class HttpCookie {
 
     private final Map<String, String> elements;
 
-    private HttpCookie() {
-        this.elements = new HashMap<>();
-    }
-
     private HttpCookie(final Map<String, String> elements) {
         this.elements = elements;
+    }
+
+    public static HttpCookie createEmptyCookie() {
+        return new HttpCookie(new HashMap<>());
     }
 
     public static HttpCookie fromRequestInput(final List<String> headersInput) {
@@ -41,7 +41,7 @@ public class HttpCookie {
 
     private static HttpCookie parse(final String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isEmpty()) {
-            return new HttpCookie();
+            return HttpCookie.createEmptyCookie();
         }
         return new HttpCookie(Arrays.stream(cookieHeader.split(ELEMENT_SPLIT_REGEX))
                 .map(element -> element.split(KEY_VALUE_SPLIT_REGEX))

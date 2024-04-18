@@ -1,5 +1,6 @@
 package webserver;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,12 +20,20 @@ public class Headers {
         this.elements = elements;
     }
 
+    public static Headers createEmptyHeaders() {
+        return new Headers(new HashMap<>());
+    }
+
     public static Headers fromRequestInput(final List<String> headersInput) {
         return new Headers(headersInput.stream()
                 .map(input -> input.split(SPLIT_REGEX))
                 .filter(split -> !Objects.equals(split[KEY_INDEX], REQUEST_COOKIE_KEY))
                 .collect(Collectors.toMap(split -> split[KEY_INDEX], split -> split[VALUE_INDEX].trim()))
         );
+    }
+
+    public void addElement(final String key, final String value) {
+        elements.put(key, value);
     }
 
     public Map<String, String> getElements() {
