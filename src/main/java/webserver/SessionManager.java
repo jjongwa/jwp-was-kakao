@@ -1,10 +1,13 @@
 package webserver;
 
+import db.DataBase;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
+    private static final String USER_KEY = "user";
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager instance = new SessionManager();
 
@@ -15,7 +18,15 @@ public class SessionManager {
         return instance;
     }
 
-    public void add(final String sessionId) {
+    public void makeSession(final String sessionId, final String userId) {
+        if (findSession(sessionId) == null) {
+            add(sessionId);
+            final Session session = findSession(sessionId);
+            session.setAttribute(USER_KEY, DataBase.findUserById(userId));
+        }
+    }
+
+    private void add(final String sessionId) {
         SESSIONS.put(sessionId, new Session(sessionId));
     }
 

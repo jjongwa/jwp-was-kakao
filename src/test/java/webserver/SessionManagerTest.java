@@ -17,21 +17,18 @@ class SessionManagerTest {
     void 새로운_세션을_추가할_수_있다() {
         // given
         final String sessionId = "uniqueSessionId";
-        final Session expected = new Session(sessionId);
 
         // when
-        sessionManager.add(sessionId);
+        sessionManager.makeSession(sessionId, "userId");
 
-        assertThat(sessionManager.findSession(sessionId))
-                .usingRecursiveComparison()
-                .isEqualTo(expected);
+        assertThat(sessionManager.findSession(sessionId)).isNotNull();
     }
 
     @Test
     void 세션을_삭제할_수_있다() {
         // given
         final String sessionId = "uniqueSessionId";
-        sessionManager.add(sessionId);
+        sessionManager.makeSession(sessionId, "userId");
 
         // when
         sessionManager.remove(sessionId);

@@ -34,7 +34,6 @@ public class RequestHandler implements Runnable {
     private static final String LOCATION_USER_LOGIN_PATH = "Location: /user/login.html";
     private static final String LOGINED = "logined";
     private static final String TRUE = "true";
-    private static final String USER_KEY = "user";
     private static final String CONTENT_TYPE = "Content-Type";
 
     private Socket connection;
@@ -116,7 +115,7 @@ public class RequestHandler implements Runnable {
             if (!cookieByRequest.containsKey(JSESSIONID)) {
                 final UUID uuid = UUID.randomUUID();
                 httpResponse.addHeader("Set-Cookie", JSESSIONID + "=" + uuid);
-                makeSession(uuid.toString(), queryParams);
+                sessionManager.makeSession(uuid.toString(), USER_ID);
             }
             httpResponse.addHeader("Set-Cookie", LOGINED + "=" + TRUE);
             httpResponse.sendRedirect(LOCATION_INDEX_HTML);
@@ -133,13 +132,5 @@ public class RequestHandler implements Runnable {
             return;
         }
         httpResponse.sendRedirect(LOCATION_USER_LOGIN_PATH);
-    }
-
-    private void makeSession(final String uuid, final Map<String, String> queryParams) {
-        if (sessionManager.findSession(uuid) == null) {
-            sessionManager.add(uuid);
-            final Session session = sessionManager.findSession(uuid);
-            session.setAttribute(USER_KEY, DataBase.findUserById(queryParams.get(USER_ID)).get());
-        }
     }
 }
