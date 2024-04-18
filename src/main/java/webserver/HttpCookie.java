@@ -9,6 +9,7 @@ public class HttpCookie {
 
     private static final String ELEMENT_SPLIT_REGEX = "; ";
     private static final String KEY_VALUE_SPLIT_REGEX = "=";
+    private static final String COOKIE_PATH_SUFFIX = "; Path=/";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -40,11 +41,18 @@ public class HttpCookie {
         return elements.containsKey(key);
     }
 
-    public String getValueByKey(final String key) {
+    public String getValue(final String key) {
         if (key == null || key.isEmpty() || !elements.containsKey(key)) {
             return null;
         }
         return elements.get(key);
+    }
+
+    public String getValueWithPath(final String key) {
+        if (key == null || key.isEmpty() || !elements.containsKey(key)) {
+            return null;
+        }
+        return elements.get(key) + COOKIE_PATH_SUFFIX;
     }
 
     public Map<String, String> getElements() {

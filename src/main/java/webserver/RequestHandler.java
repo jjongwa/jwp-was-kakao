@@ -40,7 +40,6 @@ public class RequestHandler implements Runnable {
     private static final String JSESSIONID = "JSESSIONID";
     private static final String SET_COOKIE = "Set-Cookie: ";
     private static final String DELIMITER = "=";
-    private static final String COOKIE_PATH_POSTFIX = "; Path=/";
     private static final String USER_LIST_PATH = "/user/list";
     private static final String LOCATION_USER_LOGIN_PATH = "Location: /user/login.html";
 
@@ -82,7 +81,7 @@ public class RequestHandler implements Runnable {
             }
             if (httpRequest.isMethodEqual(HttpMethod.GET) &&
                 httpRequest.isPathStartingWith(LOGIN_USER_PATH) &&
-                sessionManager.findSession(httpRequest.getCookie().getValueByKey(JSESSIONID)) != null
+                sessionManager.findSession(httpRequest.getCookie().getValue(JSESSIONID)) != null
             ) {
                 redirectResponse(dos, body, LOCATION_INDEX_HTML, httpRequest.getCookie());
                 return;
@@ -107,7 +106,7 @@ public class RequestHandler implements Runnable {
 
     private void doGetUserList(byte[] body, final DataOutputStream dos, final HttpRequest httpRequest) {
         final HttpCookie cookie = httpRequest.getCookie();
-        if (Objects.equals(cookie.getValueByKey(LOGINED), TRUE)) {
+        if (Objects.equals(cookie.getValue(LOGINED), TRUE)) {
             try {
                 body = HtmlPageBuilder.buildUserListPage();
                 response200Header(dos, body.length, httpRequest);
@@ -132,7 +131,7 @@ public class RequestHandler implements Runnable {
     private void doPostLoginUser(final HttpRequest httpRequest, final DataOutputStream dos, final byte[] body) {
         final Map<String, String> queryParams = httpRequest.getBody();
         final HttpCookie cookie = httpRequest.getCookie();
-        if (sessionManager.findSession(cookie.getValueByKey(JSESSIONID)) != null) {
+        if (sessionManager.findSession(cookie.getValue(JSESSIONID)) != null) {
             redirectResponse(dos, body, LOCATION_INDEX_HTML, cookie);
             return;
         }
@@ -157,10 +156,10 @@ public class RequestHandler implements Runnable {
     private String writeJSessionId(final HttpCookie cookie) {
         if (!cookie.containsKey(JSESSIONID)) {
             final UUID uuid = UUID.randomUUID();
-            cookie.addElement(JSESSIONID, uuid + COOKIE_PATH_POSTFIX);
+            cookie.addElement(JSESSIONID, uuid.toString());
             return uuid.toString();
         }
-        return cookie.getValueByKey(JSESSIONID);
+        return cookie.getValue(JSESSIONID);
     }
 
     private void redirectResponse(final DataOutputStream dos, final byte[] body, String location, final HttpCookie cookie) {
@@ -196,7 +195,7 @@ public class RequestHandler implements Runnable {
             dos.writeBytes(HTTP_1_1_302_REDIRECT);
             dos.writeBytes(location);
             for (final String key : cookie.getElements().keySet()) {
-                dos.writeBytes(SET_COOKIE + key + DELIMITER + cookie.getValueByKey(key) + CRLF);
+                dos.writeBytes(SET_COOKIE + key + DELIMITER + cookie.getValueWithPath(key) + CRLF);
             }
             dos.writeBytes(CRLF);
         } catch (IOException e) {

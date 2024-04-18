@@ -10,16 +10,19 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final String COOKIE_KEY = "Cookie";
     private static final String UNSUPPORTED_METHOD = "지원하지 않는 메서드입니다.";
 
     private final RequestLine line;
     private final RequestHeader headers;
     private final RequestBody body;
+    private final HttpCookie cookie;
 
-    private HttpRequest(final RequestLine line, final RequestHeader headers, final RequestBody body) {
+    private HttpRequest(final RequestLine line, final RequestHeader headers, final RequestBody body, final HttpCookie cookie) {
         this.line = line;
         this.headers = headers;
         this.body = body;
+        this.cookie = cookie;
     }
 
     public static HttpRequest create(final InputStream in) throws IOException {
@@ -27,7 +30,8 @@ public class HttpRequest {
         final RequestLine requestLine = RequestLine.create(bufferedReader.readLine());
         final RequestHeader requestHeader = RequestHeader.create(bufferedReader);
         final RequestBody requestBody = RequestBody.readBodyIfPresent(bufferedReader, requestHeader);
-        return new HttpRequest(requestLine, requestHeader, requestBody);
+        final HttpCookie cookie = HttpCookie.from(requestHeader.getElement(COOKIE_KEY));
+        return new HttpRequest(requestLine, requestHeader, requestBody, cookie);
     }
 
     public boolean isMethodEqual(final HttpMethod httpMethod) {
@@ -35,7 +39,7 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        return headers.getCookie();
+        return cookie;
     }
 
     public boolean isPathStartingWith(final String path) {

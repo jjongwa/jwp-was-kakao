@@ -16,8 +16,8 @@ class HttpCookieTest {
 
         // when & then
         assertAll(
-                () -> assertThat(cookie.getValueByKey("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46"),
-                () -> assertThat(cookie.getValueByKey("Path")).isEqualTo("/")
+                () -> assertThat(cookie.getValue("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46"),
+                () -> assertThat(cookie.getValue("Path")).isEqualTo("/")
         );
     }
 
@@ -31,7 +31,7 @@ class HttpCookieTest {
         cookie.addElement("good", "dino");
 
         // then
-        assertThat(cookie.getValueByKey("good")).isEqualTo("dino");
+        assertThat(cookie.getValue("good")).isEqualTo("dino");
     }
 
     @Test
