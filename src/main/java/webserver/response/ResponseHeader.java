@@ -18,6 +18,19 @@ public class ResponseHeader {
     }
 
     public void addHeader(final String key, final String value) {
+        if (key.equals("Set-Cookie")) {
+            final String[] split = value.split("=");
+            cookie.addElement(split[0], split[1]);
+            return;
+        }
         headers.addElement(key, value);
+    }
+
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }
