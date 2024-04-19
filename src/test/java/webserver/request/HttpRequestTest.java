@@ -35,7 +35,7 @@ class HttpRequestTest {
         final HttpRequest request = HttpRequest.create(in);
 
         assertAll(
-                () -> assertThat(request.getMethod()).isEqualTo("GET"),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(request.getPath()).isEqualTo("/user/create"),
                 () -> assertThat(request.getHeader("Connection")).isEqualTo("keep-alive"),
                 () -> assertThat(request.getParameter("userId")).isEqualTo("javajigi")
@@ -48,7 +48,7 @@ class HttpRequestTest {
         HttpRequest request = HttpRequest.create(in);
 
         assertAll(
-                () -> assertThat(request.getMethod()).isEqualTo("POST"),
+                () -> assertThat(request.getMethod()).isEqualTo(webserver.request.HttpMethod.POST),
                 () -> assertThat(request.getPath()).isEqualTo("/user/create"),
                 () -> assertThat(request.getHeader("Connection")).isEqualTo("keep-alive"),
                 () -> assertThat(request.getParameter("userId")).isEqualTo("javajigi")

@@ -30,36 +30,20 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    public boolean isMethodEqual(final HttpMethod httpMethod) {
-        return this.line.checkMethod(httpMethod);
-    }
-
     public HttpCookie getCookie() {
         return header.getCookie();
-    }
-
-    public boolean isPathStartingWith(final String path) {
-        return this.line.isPathStartingWith(path);
     }
 
     public Map<String, String> getBody() {
         return body.getBody();
     }
 
-    public boolean isPathEqual(final String path) {
-        return line.checkPath(path);
-    }
-
     public String findContentType() {
         return this.line.getContentType();
     }
 
-    public String findFilePath() {
-        return line.getFilePath();
-    }
-
-    public String getMethod() {
-        return line.getMethod().name();
+    public HttpMethod getMethod() {
+        return line.getMethod();
     }
 
     public String getPath() {
