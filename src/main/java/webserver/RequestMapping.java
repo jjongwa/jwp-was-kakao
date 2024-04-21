@@ -1,6 +1,7 @@
 package webserver;
 
 import webserver.controller.Controller;
+import webserver.controller.DefaultController;
 import webserver.request.HttpRequest;
 
 import java.util.HashMap;
@@ -11,7 +12,6 @@ public class RequestMapping {
     private static final String EXTENSION_DELIMITER = "\\.";
     private static final int ZERO_INDEX = 0;
     private static final String PATH_ALREADY_EXIST_MESSAGE = "이미 존재하는 path입니다.";
-    private static final String UNDEFINED_PATH_MESSAGE = "존재하지 않는 path입니다.";
 
     private final Map<String, Controller> mapper = new HashMap<>();
 
@@ -24,9 +24,6 @@ public class RequestMapping {
 
     public Controller getController(final HttpRequest request) {
         final String resource = request.getPath().split(EXTENSION_DELIMITER)[ZERO_INDEX];
-        if (mapper.containsKey(resource)) {
-            return mapper.get(resource);
-        }
-        throw new IllegalArgumentException(UNDEFINED_PATH_MESSAGE);
+        return mapper.getOrDefault(resource, new DefaultController());
     }
 }
