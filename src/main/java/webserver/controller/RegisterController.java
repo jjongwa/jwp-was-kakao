@@ -11,6 +11,7 @@ public class RegisterController extends AbstractController {
 
     private static final String USER_ID = "userId";
     private static final String CRLF = "\r\n";
+    private static final String ALREADY_EXIST_ID_MESSAGE = "이미 존재하는 아이디입니다.";
     private static final String LOCATION_INDEX_HTML = "Location: /index.html " + CRLF;
 
 
@@ -18,7 +19,7 @@ public class RegisterController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final Map<String, String> queryParams = request.getBody();
         if (DataBase.isAlreadyExistId(queryParams.get(USER_ID))) {
-            return;
+            throw new IllegalArgumentException(ALREADY_EXIST_ID_MESSAGE);
         }
         DataBase.addUser(User.of(queryParams));
         response.sendRedirect(LOCATION_INDEX_HTML);
