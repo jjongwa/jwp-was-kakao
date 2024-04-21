@@ -18,7 +18,7 @@ public class SessionManager {
         return instance;
     }
 
-    public void makeSession(final String sessionId, final String userId) {
+    public void makeUserSession(final String sessionId, final String userId) {
         if (findSession(sessionId) == null) {
             add(sessionId);
             final Session session = findSession(sessionId);

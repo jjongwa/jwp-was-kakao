@@ -19,7 +19,7 @@ class SessionManagerTest {
         final String sessionId = "uniqueSessionId";
 
         // when
-        sessionManager.makeSession(sessionId, "userId");
+        sessionManager.makeUserSession(sessionId, "userId");
 
         assertThat(sessionManager.findSession(sessionId)).isNotNull();
     }
@@ -28,7 +28,7 @@ class SessionManagerTest {
     void 세션을_삭제할_수_있다() {
         // given
         final String sessionId = "uniqueSessionId";
-        sessionManager.makeSession(sessionId, "userId");
+        sessionManager.makeUserSession(sessionId, "userId");
 
         // when
         sessionManager.remove(sessionId);
