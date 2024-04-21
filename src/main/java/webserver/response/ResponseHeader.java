@@ -5,6 +5,11 @@ import webserver.HttpCookie;
 
 public class ResponseHeader {
 
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String COOKIE_DELIMITER = "=";
+    private static final int INDEX_ZERO = 0;
+    private static final int INDEX_ONE = 1;
+
     private final Headers headers;
     private final HttpCookie cookie;
 
@@ -18,9 +23,9 @@ public class ResponseHeader {
     }
 
     public void addHeader(final String key, final String value) {
-        if (key.equals("Set-Cookie")) {
-            final String[] split = value.split("=");
-            cookie.addElement(split[0], split[1]);
+        if (key.equals(SET_COOKIE)) {
+            final String[] split = value.split(COOKIE_DELIMITER);
+            cookie.addElement(split[INDEX_ZERO], split[INDEX_ONE]);
             return;
         }
         headers.addElement(key, value);

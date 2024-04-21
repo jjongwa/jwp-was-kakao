@@ -3,7 +3,7 @@ package webserver;
 public enum HttpStatusType {
 
     OK(200, "OK"),
-    FOUND(302, "Found"),
+    REDIRECT(302, "Redirect"),
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "Not Found"),

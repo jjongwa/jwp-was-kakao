@@ -1,10 +1,10 @@
 package webserver.response;
 
 import db.DataBase;
-import model.User;
 import utils.FileIoUtils;
 import utils.HtmlPageBuilder;
 import webserver.HttpExtensionType;
+import webserver.HttpStatusType;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,7 +19,15 @@ public class HttpResponse {
     private static final String DEFAULT_PAGE_MESSAGE = "Hello, World!";
     private static final int OFFSET_ZERO = 0;
     private static final String CRLF = "\r\n";
+    private static final String USER_LIST_PAGE_PATH = "/user/list";
     private static final String DEFAULT_FILE_NAME = "templates/index.html";
+    private static final String CONTENT_TYPE = "Content-Type: ";
+    private static final String CONTENT_LENGTH = "Content-Length: ";
+    private static final String SET_COOKIE = "Set-Cookie: ";
+    private static final String HTTP_1_1 = "HTTP/1.1";
+    private static final String SPACE = " ";
+    private static final String COOKIE_DELIMITER = "=";
+    private static final String DEFAULT_PATH = "/";
 
     private final DataOutputStream dos;
     private final ResponseHeader header;
@@ -46,11 +54,11 @@ public class HttpResponse {
     }
 
     private void forwardBody(final String path) throws IOException, URISyntaxException {
-        if (Objects.equals(path, "/")) {
+        if (Objects.equals(path, DEFAULT_PATH)) {
             this.body = FileIoUtils.loadFileFromClasspath(DEFAULT_FILE_NAME);
             return;
         }
-        if (Objects.equals(path, "/user/list")) {
+        if (Objects.equals(path, USER_LIST_PAGE_PATH)) {
             final Map<String, Object> models = new HashMap<>();
             models.put("users", DataBase.findAll());
             this.body = HtmlPageBuilder.buildUserListPage(models);
@@ -60,9 +68,9 @@ public class HttpResponse {
     }
 
     private void response200Header(final int lengthOfBodyContent) throws IOException {
-        dos.writeBytes("HTTP/1.1 200 OK " + CRLF);
-        dos.writeBytes("Content-Type: " + header.getHeaders().getElement("Content-Type") + CRLF);
-        dos.writeBytes("Content-Length: " + lengthOfBodyContent + CRLF);
+        dos.writeBytes(HTTP_1_1 + SPACE + HttpStatusType.OK.getCode() + SPACE + HttpStatusType.OK.getCode() + CRLF);
+        dos.writeBytes(CONTENT_TYPE + header.getHeaders().getElement(CONTENT_TYPE) + CRLF);
+        dos.writeBytes(CONTENT_LENGTH + lengthOfBodyContent + CRLF);
         dos.writeBytes(CRLF);
     }
 
@@ -72,7 +80,7 @@ public class HttpResponse {
     }
 
     public void sendRedirect(final String location) throws IOException {
-        dos.writeBytes("HTTP/1.1 302 REDIRECT " + CRLF);
+        dos.writeBytes(HTTP_1_1 + SPACE + HttpStatusType.REDIRECT.getCode() + SPACE + HttpStatusType.REDIRECT.getMessage() + CRLF);
         dos.writeBytes(location);
         processHeaders();
         dos.writeBytes(CRLF);
@@ -80,7 +88,7 @@ public class HttpResponse {
 
     private void processHeaders() throws IOException {
         for (final String key : header.getCookie().getElements().keySet()) {
-            dos.writeBytes("Set-Cookie: " + key + "=" + header.getCookie().getValueWithPath(key) + CRLF);
+            dos.writeBytes(SET_COOKIE + key + COOKIE_DELIMITER + header.getCookie().getValueWithPath(key) + CRLF);
         }
     }
 }
