@@ -6,6 +6,7 @@ import webserver.SessionManager;
 import webserver.request.HttpRequest;
 import webserver.response.HttpResponse;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,30 +30,43 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final Map<String, String> queryParams = request.getBody();
         final HttpCookie cookieByRequest = request.getCookie();
-        if (sessionManager.findSession(cookieByRequest.getValue(JSESSIONID)) != null) {
-            response.sendRedirect(LOCATION_INDEX_HTML);
+        if (sessionManager.isLogined(cookieByRequest)) {
+            redirectToIndexPage(response);
             return;
         }
-        if (DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
-            if (!cookieByRequest.containsKey(JSESSIONID)) {
-                final UUID uuid = UUID.randomUUID();
-                response.addHeader(SET_COOKIE, JSESSIONID + DELIMITER + uuid);
-                sessionManager.makeUserSession(uuid.toString(), USER_ID);
-            }
-            response.addHeader(SET_COOKIE, LOGINED + DELIMITER + TRUE);
-            response.sendRedirect(LOCATION_INDEX_HTML);
-            return;
-        }
+        tryUserLogin(queryParams, cookieByRequest, response);
         response.sendRedirect(LOCATION_LONGIN_FAILED_HTML);
+    }
+
+    private void tryUserLogin(Map<String, String> queryParams, HttpCookie cookie, HttpResponse response) throws Exception {
+        if (!DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
+            response.sendRedirect(LOCATION_LONGIN_FAILED_HTML);
+            return;
+        }
+        manageUserSession(cookie, response);
+        response.addHeader(SET_COOKIE, LOGINED + DELIMITER + TRUE);
+        redirectToIndexPage(response);
+    }
+
+    private void manageUserSession(HttpCookie cookie, HttpResponse response) {
+        if (!cookie.containsKey(JSESSIONID)) {
+            final UUID uuid = UUID.randomUUID();
+            response.addHeader(SET_COOKIE, JSESSIONID + DELIMITER + uuid);
+            sessionManager.makeUserSession(uuid.toString(), USER_ID);
+        }
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (sessionManager.findSession(request.getCookie().getValue(JSESSIONID)) != null) {
-            response.sendRedirect(LOCATION_INDEX_HTML);
+        if (sessionManager.isLogined(request.getCookie())) {
+            redirectToIndexPage(response);
             return;
         }
         response.addHeader(CONTENT_TYPE, request.findContentType());
         response.forward(request.getPath());
+    }
+
+    private void redirectToIndexPage(final HttpResponse response) throws IOException {
+        response.sendRedirect(LOCATION_INDEX_HTML);
     }
 }

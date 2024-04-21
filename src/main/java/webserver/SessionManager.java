@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionManager {
 
     private static final String USER_KEY = "user";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager instance = new SessionManager();
 
@@ -35,6 +36,10 @@ public class SessionManager {
             return null;
         }
         return SESSIONS.get(id);
+    }
+
+    public boolean isLogined(final HttpCookie cookie) {
+        return SESSIONS.containsKey(cookie.getValue(JSESSIONID));
     }
 
     public void remove(final String id) {
