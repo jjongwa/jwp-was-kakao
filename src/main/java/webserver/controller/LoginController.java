@@ -7,7 +7,6 @@ import webserver.request.HttpRequest;
 import webserver.response.HttpResponse;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
 public class LoginController extends AbstractController {
@@ -27,28 +26,26 @@ public class LoginController extends AbstractController {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        final Map<String, String> queryParams = request.getBody();
-        final HttpCookie cookieByRequest = request.getCookie();
-        if (sessionManager.isLogined(cookieByRequest)) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        if (sessionManager.isLogined(request.getCookie())) {
             redirectToIndexPage(response);
             return;
         }
-        tryUserLogin(queryParams, cookieByRequest, response);
+        tryUserLogin(request, response);
         response.sendRedirect(LOCATION_LONGIN_FAILED_HTML);
     }
 
-    private void tryUserLogin(Map<String, String> queryParams, HttpCookie cookie, HttpResponse response) throws Exception {
-        if (!DataBase.isUserExist(queryParams.get(USER_ID), queryParams.get(PASSWORD))) {
+    private void tryUserLogin(final HttpRequest request, final HttpResponse response) throws Exception {
+        if (!DataBase.isUserExist(request.getBody(USER_ID), request.getBody(PASSWORD))) {
             response.sendRedirect(LOCATION_LONGIN_FAILED_HTML);
             return;
         }
-        manageUserSession(cookie, response);
+        manageUserSession(request.getCookie(), response);
         response.addHeader(SET_COOKIE, LOGINED + DELIMITER + TRUE);
         redirectToIndexPage(response);
     }
 
-    private void manageUserSession(HttpCookie cookie, HttpResponse response) {
+    private void manageUserSession(final HttpCookie cookie, final HttpResponse response) {
         if (!cookie.containsKey(JSESSIONID)) {
             final UUID uuid = UUID.randomUUID();
             response.addHeader(SET_COOKIE, JSESSIONID + DELIMITER + uuid);

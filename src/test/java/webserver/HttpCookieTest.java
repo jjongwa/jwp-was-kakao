@@ -14,7 +14,7 @@ class HttpCookieTest {
             "Host: localhost:8080\n"
             , "Connection: keep-alive\n"
             , "Accept: */*\n"
-            , "Cookie: JSESSIONID=1234; Path=/\n"
+            , "Cookie: JSESSIONID=1234; Good=Dino; Path=/\n"
     );
 
     @Test
@@ -25,7 +25,7 @@ class HttpCookieTest {
         // then
         assertAll(
                 () -> assertThat(httpCookie.getValue("JSESSIONID")).isEqualTo("1234"),
-                () -> assertThat(httpCookie.getValue("Path")).isEqualTo("/")
+                () -> assertThat(httpCookie.getValue("Good")).isEqualTo("Dino")
         );
     }
 
@@ -49,8 +49,8 @@ class HttpCookieTest {
         // then
         assertAll(
                 () -> assertThat(httpCookie.containsKey("JSESSIONID")).isTrue(),
-                () -> assertThat(httpCookie.containsKey("Path")).isTrue(),
-                () -> assertThat(httpCookie.containsKey("good")).isFalse()
+                () -> assertThat(httpCookie.containsKey("Good")).isTrue(),
+                () -> assertThat(httpCookie.containsKey("Bad")).isFalse()
         );
     }
 }

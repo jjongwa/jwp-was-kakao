@@ -51,7 +51,7 @@ class HttpRequestTest {
                 () -> assertThat(request.getMethod()).isEqualTo(webserver.request.HttpMethod.POST),
                 () -> assertThat(request.getPath()).isEqualTo("/user/create"),
                 () -> assertThat(request.getHeader("Connection")).isEqualTo("keep-alive"),
-                () -> assertThat(request.getParameter("userId")).isEqualTo("javajigi")
+                () -> assertThat(request.getBody("userId")).isEqualTo("javajigi")
         );
     }
 }

@@ -27,7 +27,6 @@ class RequestHeaderTest {
                 () -> assertThat(requestHeader.getElement("Host")).isEqualTo("localhost"),
                 () -> assertThat(requestHeader.getElement("User-Agent")).isEqualTo("JUnitTest"),
                 () -> assertThat(cookie.getValue("sessionId")).isEqualTo("abc123"),
-                () -> assertThat(cookie.getValue("Path")).isEqualTo("/"),
                 () -> assertThat(cookie.getValue("dino")).isEqualTo("good")
         );
     }

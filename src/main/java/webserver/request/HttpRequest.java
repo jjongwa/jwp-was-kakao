@@ -6,11 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 public class HttpRequest {
-
-    private static final String UNSUPPORTED_METHOD = "지원하지 않는 메서드입니다.";
 
     private final RequestLine line;
     private final RequestHeader header;
@@ -30,18 +27,6 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    public HttpCookie getCookie() {
-        return header.getCookie();
-    }
-
-    public Map<String, String> getBody() {
-        return body.getBody();
-    }
-
-    public String findContentType() {
-        return this.line.getContentType();
-    }
-
     public HttpMethod getMethod() {
         return line.getMethod();
     }
@@ -50,17 +35,23 @@ public class HttpRequest {
         return line.getPath();
     }
 
+    public String findContentType() {
+        return this.line.getContentType();
+    }
+
+    public String getParameter(final String key) {
+        return line.getParameter(key);
+    }
+
     public String getHeader(final String key) {
         return header.getElement(key);
     }
 
-    public String getParameter(final String key) {
-        if (line.getMethod() == HttpMethod.GET) {
-            return line.getParameter(key);
-        }
-        if (line.getMethod() == HttpMethod.POST) {
-            return body.getElement(key);
-        }
-        throw new IllegalArgumentException(UNSUPPORTED_METHOD);
+    public HttpCookie getCookie() {
+        return header.getCookie();
+    }
+
+    public String getBody(final String key) {
+        return body.getElement(key);
     }
 }
