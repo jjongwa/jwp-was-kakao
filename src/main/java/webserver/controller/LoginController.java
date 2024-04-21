@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
             if (!cookieByRequest.containsKey(JSESSIONID)) {
                 final UUID uuid = UUID.randomUUID();
                 response.addHeader(SET_COOKIE, JSESSIONID + DELIMITER + uuid);
-                sessionManager.makeSession(uuid.toString(), USER_ID);
+                sessionManager.makeUserSession(uuid.toString(), USER_ID);
             }
             response.addHeader(SET_COOKIE, LOGINED + DELIMITER + TRUE);
             response.sendRedirect(LOCATION_INDEX_HTML);
