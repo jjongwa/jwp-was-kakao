@@ -4,13 +4,11 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
-import db.DataBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HtmlPageBuilder {
@@ -33,12 +31,10 @@ public class HtmlPageBuilder {
     private HtmlPageBuilder() {
     }
 
-    public static byte[] buildUserListPage() {
+    public static byte[] buildUserListPage(Map<String, Object> users) {
         try {
             final Template template = HANDLEBARS.compile(USER_LIST_PATH);
-            final Map<String, Object> model = new HashMap<>();
-            model.put("users", DataBase.findAll());
-            final String pageContent = template.apply(model);
+            final String pageContent = template.apply(users);
             return pageContent.getBytes(StandardCharsets.UTF_8);
         } catch (final IOException e) {
             logger.error(e.getMessage());

@@ -1,5 +1,7 @@
 package webserver.response;
 
+import db.DataBase;
+import model.User;
 import utils.FileIoUtils;
 import utils.HtmlPageBuilder;
 import webserver.HttpExtensionType;
@@ -8,6 +10,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class HttpResponse {
@@ -47,7 +51,9 @@ public class HttpResponse {
             return;
         }
         if (Objects.equals(path, "/user/list")) {
-            this.body = HtmlPageBuilder.buildUserListPage();
+            final Map<String, Object> models = new HashMap<>();
+            models.put("users", DataBase.findAll());
+            this.body = HtmlPageBuilder.buildUserListPage(models);
             return;
         }
         this.body = FileIoUtils.loadFileFromClasspath(HttpExtensionType.findDirectory(path) + path);
