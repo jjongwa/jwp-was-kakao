@@ -44,4 +44,8 @@ public class RequestPath {
     public String getResource() {
         return resource;
     }
+
+    public String getParameter(final String key) {
+        return queryParameter.getParam(key);
+    }
 }

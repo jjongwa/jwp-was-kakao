@@ -1,86 +1,57 @@
 package webserver.request;
 
-import utils.IOUtils;
 import webserver.HttpCookie;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class HttpRequest {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String EMPTY_BODY = "";
-
     private final RequestLine line;
-    private final RequestHeaders headers;
+    private final RequestHeader header;
     private final RequestBody body;
 
-    public HttpRequest(final RequestLine line, final RequestHeaders headers, final RequestBody body) {
+    private HttpRequest(final RequestLine line, final RequestHeader header, final RequestBody body) {
         this.line = line;
-        this.headers = headers;
+        this.header = header;
         this.body = body;
     }
 
-    public static HttpRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
-        final String firstLine = bufferedReader.readLine();
-        final RequestHeaders requestHeaders = readHeaders(bufferedReader);
-
-        final RequestBody requestBody = readBodyIfPresent(bufferedReader, requestHeaders);
-
-        return new HttpRequest(
-                RequestLine.from(firstLine),
-                requestHeaders,
-                requestBody
-        );
+    public static HttpRequest create(final InputStream in) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+        final RequestLine requestLine = RequestLine.create(bufferedReader.readLine());
+        final RequestHeader requestHeader = RequestHeader.create(bufferedReader);
+        final RequestBody requestBody = RequestBody.readBodyIfPresent(bufferedReader, requestHeader);
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    private static RequestHeaders readHeaders(BufferedReader bufferedReader) {
-        return new RequestHeaders(
-                bufferedReader.lines()
-                        .takeWhile(newLine -> newLine != null && !newLine.isEmpty())
-                        .collect(Collectors.toUnmodifiableList())
-        );
+    public HttpMethod getMethod() {
+        return line.getMethod();
     }
 
-    private static RequestBody readBodyIfPresent(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
-        if (requestHeaders.getElements().containsKey(CONTENT_LENGTH)) {
-            final int contentLength = Integer.parseInt(requestHeaders.getElements().get(CONTENT_LENGTH));
-            return RequestBody.parse(IOUtils.readData(bufferedReader, contentLength));
-        }
-        return RequestBody.parse(EMPTY_BODY);
-    }
-
-    public boolean isMethodEqual(final HttpMethod httpMethod) {
-        return this.line.checkMethod(httpMethod);
-    }
-
-    public HttpCookie getCookie() {
-        return headers.getCookie();
-    }
-
-    public boolean isPathStartingWith(final String path) {
-        return this.line.isPathStartingWith(path);
-    }
-
-    public Map<String, String> getBody() {
-        return body.getBody();
-    }
-
-    public boolean isPathEqual(final String path) {
-        return line.checkPath(path);
+    public String getPath() {
+        return line.getPath();
     }
 
     public String findContentType() {
         return this.line.getContentType();
     }
 
-    public String findFilePath() {
-        return line.getFilePath();
+    public String getParameter(final String key) {
+        return line.getParameter(key);
     }
 
-    public RequestHeaders getHeaders() {
-        return headers;
+    public String getHeader(final String key) {
+        return header.getElement(key);
+    }
+
+    public HttpCookie getCookie() {
+        return header.getCookie();
+    }
+
+    public String getBody(final String key) {
+        return body.getElement(key);
     }
 }
