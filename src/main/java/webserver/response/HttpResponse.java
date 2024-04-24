@@ -21,8 +21,9 @@ public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String USER_LIST_PAGE_PATH = "/user/list";
     private static final String DEFAULT_FILE_NAME = "templates/index.html";
-    private static final String CONTENT_TYPE = "Content-Type: ";
-    private static final String CONTENT_LENGTH = "Content-Length: ";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String HEADER_DELIMITER = ": ";
     private static final String SET_COOKIE = "Set-Cookie: ";
     private static final String HTTP_1_1 = "HTTP/1.1";
     private static final String SPACE = " ";
@@ -69,8 +70,8 @@ public class HttpResponse {
 
     private void response200Header(final int lengthOfBodyContent) throws IOException {
         dos.writeBytes(HTTP_1_1 + SPACE + HttpStatusType.OK.getCode() + SPACE + HttpStatusType.OK.getCode() + CRLF);
-        dos.writeBytes(CONTENT_TYPE + header.getHeaders().getElement(CONTENT_TYPE) + CRLF);
-        dos.writeBytes(CONTENT_LENGTH + lengthOfBodyContent + CRLF);
+        dos.writeBytes(CONTENT_TYPE + HEADER_DELIMITER + header.getHeaders().getElement(CONTENT_TYPE) + CRLF);
+        dos.writeBytes(CONTENT_LENGTH + HEADER_DELIMITER + lengthOfBodyContent + CRLF);
         dos.writeBytes(CRLF);
     }
 
